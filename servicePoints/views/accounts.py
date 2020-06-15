@@ -1,4 +1,5 @@
 import hashlib
+import uuid
 import os
 import flask
 from flask import render_template
@@ -73,11 +74,10 @@ def create():
         if flask.session['password'] == '':
             flask.abort(400)
 
-
-        # pw = hash_pass(flask.session['password'])
+        pw = hash_pass(flask.session['password'])
         data = (flask.session['username'], flask.session['fullname'],
                 flask.session['email'], flask.session['orgName'],
-                flask.session['password'])
+                pw)
         cur = servicePoints.model.get_db()
         cur.execute("INSERT INTO users(username, fullname, email, orgName, "
                     "password) VALUES (?, ?, ?, ?, ?)", data)
@@ -94,3 +94,14 @@ def index():
         context = {}
         return render_template('index.html', **context)
     return flask.redirect(flask.url_for('login'))
+
+def hash_pass(password_in):
+    """Hash passwords."""
+    algorithm = 'sha512'
+    salt = uuid.uuid4().hex
+    hash_obj = hashlib.new(algorithm)
+    password_salted = salt + password_in
+    hash_obj.update(password_salted.encode('utf-8'))
+    password_hash = hash_obj.hexdigest()
+    password_db_string = "$".join([algorithm, salt, password_hash])
+    return password_db_string
