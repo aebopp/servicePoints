@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<body>
+<title>ServicePoints</title>
+  <form action="/accounts/create/" method="post" enctype="multipart/form-data">
+    <p>
+      Name
+    <input type="text" name="fullname"/>
+    </p>
+    <p>
+      Username
+    <input type="text" name="username"/>
+    </p>
+    <p>
+      Email
+    <input type="text" name="email"/>
+    </p>
+    <p>
+      Student Organization
+    <input type="text" name="orgName"/>
+    </p>
+    <p>
+      Password
+    <input type="password" name="password"/>
+    </p>
+    <input type="submit" name="signup" value="sign up"/>
+  </form>
+  <p>
+    Have an account?
+  <a href="/accounts/login/">Log in</a>
+  </p>
+</body>
+</html>
