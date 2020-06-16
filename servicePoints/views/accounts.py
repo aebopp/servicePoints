@@ -105,3 +105,17 @@ def hash_pass(password_in):
     password_hash = hash_obj.hexdigest()
     password_db_string = "$".join([algorithm, salt, password_hash])
     return password_db_string
+
+@servicePoints.app.route('/accounts/delete/', methods=['GET', 'POST'])
+def delete():
+    """Render delete page."""
+    if flask.request.method == 'POST':
+        name = (flask.session['username'])
+        to_add = (name,)
+        cur = servicePoints.model.get_db()
+
+        flask.session.clear()
+        cur.execute('DELETE FROM users WHERE username=?', to_add)
+        return flask.redirect(flask.url_for('create'))
+    context = {'username': flask.session['username']}
+    return render_template('delete.html', **context)
