@@ -222,3 +222,9 @@ def incompleteForm(prev):
         return flask.redirect(flask.url_for(prev))
     context = {"prev": prev}
     return render_template('incompleteForm.html', **context)
+
+@servicePoints.app.route('/accounts/mask/')
+def mask():
+    context = {}
+    return render_template('mask.html', **context)
+
