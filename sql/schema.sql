@@ -8,3 +8,9 @@ CREATE TABLE users(
 		password VARCHAR(256) NOT NULL,
 	  PRIMARY KEY(username)
 );
+
+CREATE TABLE orgs(
+	  username VARCHAR(20) NOT NULL,
+	  orgName VARCHAR(40) NOT NULL,
+	  PRIMARY KEY(orgName)
+);

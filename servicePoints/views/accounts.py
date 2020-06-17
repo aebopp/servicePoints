@@ -22,7 +22,7 @@ def login():
                                     {"who": flask.request.form['username']})
         password_3 = password_1.fetchall()
         if not password_3:
-            flask.abort(403)
+            return flask.redirect(flask.url_for('accountNotFound'))
         password_2 = password_3[0]['password']
         password_4 = password_2.split('$')
         algorithm = password_4[0]
@@ -33,7 +33,7 @@ def login():
         hash_obj.update(password_salted.encode('utf-8'))
         password_hash = hash_obj.hexdigest()
         if p2word != password_hash:
-            flask.abort(403)
+            return flask.redirect(flask.url_for('accountNotFound'))
         flask.session['username'] = flask.request.form['username']
         return flask.redirect(flask.url_for('index'))
     context = {}
@@ -53,26 +53,31 @@ def create():
     if 'username' in flask.session:
         return flask.redirect(flask.url_for('index'))
     if flask.request.method == 'POST':
+        cursor = servicePoints.model.get_db().cursor()
+        name = str(flask.request.form['username'])
+        orgName = str(flask.request.form['orgName'])
+        password = str(flask.request.form['password'])
+        
+        to_add = (name,)
+        to_join = (orgName,)
+        cursor.execute('SELECT * FROM users WHERE username=?', to_add)
+        if cursor.fetchone() is not None:
+            return flask.redirect(flask.url_for('duplicateUsername', prev='create'))
 
-        # If a user tries to create an account with an existing username in
-        # the database, abort(409)
+        cursor.execute('SELECT * FROM orgs WHERE orgName=?', to_join)
+        if cursor.fetchone() is None:
+            return flask.redirect(flask.url_for('orgNotFound'))
+
+        # If a user tries to create an account with an empty string as the
+        # password, abort(400)
+        if password == '':
+            flask.abort(400)
+
         flask.session['username'] = flask.request.form['username']
         flask.session['fullname'] = flask.request.form['fullname']
         flask.session['orgName'] = flask.request.form['orgName']
         flask.session['email'] = flask.request.form['email']
         flask.session['password'] = flask.request.form['password']
-        cursor = servicePoints.model.get_db().cursor()
-        name = str(flask.session['username'])
-
-        to_add = (name,)
-        cursor.execute('SELECT * FROM users WHERE username=?', to_add)
-        if cursor.fetchone() is not None:
-            flask.abort(409)
-
-        # If a user tries to create an account with an empty string as the
-        # password, abort(400)
-        if flask.session['password'] == '':
-            flask.abort(400)
 
         pw = hash_pass(flask.session['password'])
         data = (flask.session['username'], flask.session['fullname'],
@@ -86,6 +91,62 @@ def create():
 
     context = {}
     return render_template('create.html', **context)
+
+@servicePoints.app.route('/accounts/createOrg/', methods=['GET', 'POST'])
+def createOrg():
+    """Render createOrg page."""
+    # If a user is already logged in, redirect to /accounts/edit/
+    if 'username' in flask.session:
+        return flask.redirect(flask.url_for('index'))
+    if flask.request.method == 'POST':
+
+        # If a user tries to create an account with an existing username in
+        # the database, abort(409)
+        cursor = servicePoints.model.get_db().cursor()
+        name = str(flask.request.form['username'])
+        orgName = str(flask.request.form['orgName'])
+
+        to_add = (name,)
+        to_addOrg = (orgName,)
+        cursor.execute('SELECT * FROM users WHERE username=?', to_add)
+        if cursor.fetchone() is not None:
+            return flask.redirect(flask.url_for('duplicateUsername', prev='createOrg'))
+
+        cursor.execute('SELECT * FROM orgs WHERE orgName=?', to_addOrg)
+        if cursor.fetchone() is not None:
+            return flask.redirect(flask.url_for('duplicateOrgName', prev='createOrg'))
+
+        # If a user tries to create an account with an empty string as the
+        # password, abort(400)
+        if len(str(flask.request.form['password'])) is 0 or len(str(flask.request.form['fullname'])) is 0:
+            return flask.redirect(flask.url_for('incompleteForm', prev="createOrg")) 
+
+        if len(str(flask.request.form['orgName'])) is 0 or len(str(flask.request.form['email'])) is 0:
+            return flask.redirect(flask.url_for('incompleteForm', prev="createOrg")) 
+        
+        if len(str(flask.request.form['username'])) is 0:
+            return flask.redirect(flask.url_for('incompleteForm', prev="createOrg"))
+
+        flask.session['username'] = flask.request.form['username']
+        flask.session['fullname'] = flask.request.form['fullname']
+        flask.session['orgName'] = flask.request.form['orgName']
+        flask.session['email'] = flask.request.form['email']
+        flask.session['password'] = flask.request.form['password']
+
+        pw = hash_pass(flask.session['password'])
+        data = (flask.session['username'], flask.session['fullname'],
+                flask.session['email'], flask.session['orgName'],
+                pw)
+        orgData = (flask.session['username'], flask.session['orgName'])
+        cur = servicePoints.model.get_db()
+        cur.execute("INSERT INTO orgs(username, orgName) VALUES (?, ?)", orgData)
+        cur.execute("INSERT INTO users(username, fullname, email, orgName, "
+                    "password) VALUES (?, ?, ?, ?, ?)", data)
+
+        return flask.redirect(flask.url_for('index'))
+
+    context = {}
+    return render_template('createOrg.html', **context)
 
 @servicePoints.app.route('/', methods=['GET', 'POST'])
 def index():
@@ -116,6 +177,48 @@ def delete():
 
         flask.session.clear()
         cur.execute('DELETE FROM users WHERE username=?', to_add)
-        return flask.redirect(flask.url_for('create'))
+        return flask.redirect(flask.url_for('login'))
     context = {'username': flask.session['username']}
     return render_template('delete.html', **context)
+
+@servicePoints.app.route('/accounts/orgNotFound/', methods=['GET', 'POST'])
+def orgNotFound():
+    """Render delete page."""
+    if flask.request.method == 'POST':
+        if 'login' in flask.request.form:
+            return flask.redirect(flask.url_for('login'))
+        if 'registerOrg' in flask.request.form:
+            return flask.redirect(flask.url_for('createOrg'))
+    context = {}
+    return render_template('orgNotFound.html', **context)
+
+@servicePoints.app.route('/accounts/accountNotFound/', methods=['GET', 'POST'])
+def accountNotFound():
+    if flask.request.method == 'POST':
+        if 'login' in flask.request.form:
+            return flask.redirect(flask.url_for('login'))
+        if 'createAccount' in flask.request.form:
+            return flask.redirect(flask.url_for('create'))
+    context = {}
+    return render_template('accountNotFound.html', **context)
+
+@servicePoints.app.route('/accounts/duplicateUsername/<prev>', methods=['GET', 'POST'])
+def duplicateUsername(prev):
+    if flask.request.method == 'POST':
+        return flask.redirect(flask.url_for(prev))
+    context = {"prev": prev}
+    return render_template('duplicateUsername.html', **context)
+
+@servicePoints.app.route('/accounts/duplicateOrgName/', methods=['GET', 'POST'])
+def duplicateOrgName():
+    if flask.request.method == 'POST':
+        return flask.redirect(flask.url_for('createOrg'))
+    context = {}
+    return render_template('duplicateOrgName.html', **context)
+
+@servicePoints.app.route('/accounts/incompleteForm/<prev>', methods=['GET', 'POST'])
+def incompleteForm(prev):
+    if flask.request.method == 'POST':
+        return flask.redirect(flask.url_for(prev))
+    context = {"prev": prev}
+    return render_template('incompleteForm.html', **context)
