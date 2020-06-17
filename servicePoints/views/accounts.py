@@ -241,3 +241,9 @@ def mask():
     context = {}
     return render_template('mask.html', **context)
 
+@servicePoints.app.route('/images/<path:filename>', methods=['GET', 'POST'])
+def images(filename):
+    if "username" in flask.session:
+        return flask.send_from_directory(
+            servicePoints.app.config['IMAGES_FOLDER'], filename, as_attachment=True)
+    return flask.redirect(flask.url_for('login'))

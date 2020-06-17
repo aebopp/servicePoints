@@ -8,9 +8,31 @@
     <p>Hours: {{hours}}</p>
     <a href="/accounts/logout/">logout</a>
     <a href="/accounts/delete/">delete</a>
-    <a href="/accounts/mask/">mask</a>
+    <p>
+    <a href="/accounts/mask/">
+        <img src=/images/mask.png alt="mask">
+    </a>
+    <a href="/accounts/mask/">
+        <img src=/images/blood.png alt="mask">
+    </a>
+    <a href="/accounts/mask/">
+        <img src=/images/food.png alt="mask">
+    </a>
+    <a href="/accounts/mask/">
+        <img src=/images/tutor.png alt="mask">
+    </a>
+    <a href="/accounts/mask/">
+        <img src=/images/submit.png alt="mask">
+    </a>
+
     {% if leader == 1 %}
-        <p>leader!</p>
+        <a href="/accounts/mask/">
+            <img src=/images/view.png alt="mask">
+        </a>
+        <a href="/accounts/mask/">
+            <img src=/images/requests.png alt="mask">
+        </a>
     {% endif %}
+    </p>
 </head>
 </html>
