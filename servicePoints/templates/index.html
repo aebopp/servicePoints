@@ -2,9 +2,15 @@
 <html>
 <head>
     <link rel="stylesheet" type="text/css" href="/css/style.css">
-    <title>ServicePoints</title>
+    <h1 style="text-align:center">Welcome to ServicePoints!</h1>
+    <p>{{username}}</p>
+    <p>{{org}}</p>
+    <p>Hours: {{hours}}</p>
     <a href="/accounts/logout/">logout</a>
     <a href="/accounts/delete/">delete</a>
     <a href="/accounts/mask/">mask</a>
+    {% if leader == 1 %}
+        <p>leader!</p>
+    {% endif %}
 </head>
 </html>

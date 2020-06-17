@@ -82,10 +82,10 @@ def create():
         pw = hash_pass(flask.session['password'])
         data = (flask.session['username'], flask.session['fullname'],
                 flask.session['email'], flask.session['orgName'],
-                pw)
+                pw, 0)
         cur = servicePoints.model.get_db()
         cur.execute("INSERT INTO users(username, fullname, email, orgName, "
-                    "password) VALUES (?, ?, ?, ?, ?)", data)
+                    "password, hours) VALUES (?, ?, ?, ?, ?, ?)", data)
 
         return flask.redirect(flask.url_for('index'))
 
@@ -136,12 +136,12 @@ def createOrg():
         pw = hash_pass(flask.session['password'])
         data = (flask.session['username'], flask.session['fullname'],
                 flask.session['email'], flask.session['orgName'],
-                pw)
+                pw, 0)
         orgData = (flask.session['username'], flask.session['orgName'])
         cur = servicePoints.model.get_db()
         cur.execute("INSERT INTO orgs(username, orgName) VALUES (?, ?)", orgData)
         cur.execute("INSERT INTO users(username, fullname, email, orgName, "
-                    "password) VALUES (?, ?, ?, ?, ?)", data)
+                    "password, hours) VALUES (?, ?, ?, ?, ?, ?)", data)
 
         return flask.redirect(flask.url_for('index'))
 
@@ -152,7 +152,20 @@ def createOrg():
 def index():
     """Render index page."""
     if 'username' in flask.session:
-        context = {}
+        username = flask.session["username"]
+        cursor = servicePoints.model.get_db()
+        studentOrgCur = cursor.execute('SELECT orgName, hours FROM users WHERE '
+                            'username =:who',
+                            {"who": username})
+        results = studentOrgCur.fetchone()
+        leaderCur = cursor.execute('SELECT orgName FROM orgs WHERE '
+                    'username =:who',
+                    {"who": username})
+        if leaderCur.fetchone() is None:
+            leader = 0
+        else:
+            leader = 1
+        context = {'username': username, 'org': results["orgName"], 'hours': results["hours"], 'leader': leader}
         return render_template('index.html', **context)
     return flask.redirect(flask.url_for('login'))
 
