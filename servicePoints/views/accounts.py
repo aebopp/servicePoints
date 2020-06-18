@@ -229,6 +229,13 @@ def duplicateOrgName():
     context = {}
     return render_template('duplicateOrgName.html', **context)
 
+@servicePoints.app.route('/accounts/duplicateTutor/', methods=['GET', 'POST'])
+def duplicateTutor():
+    if flask.request.method == 'POST':
+        return flask.redirect(flask.url_for('tutor'))
+    context = {}
+    return render_template('duplicateTutor.html', **context)
+
 @servicePoints.app.route('/accounts/incompleteForm/<prev>', methods=['GET', 'POST'])
 def incompleteForm(prev):
     if flask.request.method == 'POST':
@@ -247,3 +254,34 @@ def images(filename):
         return flask.send_from_directory(
             servicePoints.app.config['IMAGES_FOLDER'], filename, as_attachment=True)
     return flask.redirect(flask.url_for('login'))
+
+@servicePoints.app.route('/accounts/tutorsu/', methods=['GET', 'POST'])
+def tutorsu():
+
+    if flask.request.method == 'POST':
+      
+        flask.session['subjects'] = flask.request.form['subjects']
+        flask.session['time'] = flask.request.form['time']
+        cursor = servicePoints.model.get_db().cursor()
+        name = str(flask.session['username'])
+
+        to_add = (name,)
+        cursor.execute('SELECT * FROM tutors WHERE username=?', to_add)
+        if cursor.fetchone() is not None:
+            return flask.redirect(flask.url_for('duplicateTutor'))
+
+        # If a user tries to sign up with any empty fields
+        if flask.session['time'] == '':
+            return flask.redirect(flask.url_for('incompleteForm', prev="tutorsu")) 
+        if flask.session['subjects'] == '':
+            return flask.redirect(flask.url_for('incompleteForm', prev="tutorsu")) 
+
+        data = (flask.session['username'], flask.session['subjects'],
+                flask.session['time'])
+        cur = servicePoints.model.get_db()
+        cur.execute("INSERT INTO tutors(username, subject, time) VALUES (?, ?, ?)", data)
+
+        return flask.redirect(flask.url_for('index'))
+
+    context = {}
+    return render_template('tutor.html', **context)

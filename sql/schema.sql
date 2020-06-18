@@ -15,3 +15,11 @@ CREATE TABLE orgs(
 	  orgName VARCHAR(40) NOT NULL,
 	  PRIMARY KEY(orgName)
 );
+
+
+CREATE TABLE tutors(
+	  username VARCHAR(20) NOT NULL,
+	  subject VARCHAR(40) NOT NULL,
+	  time VARCHAR(80) NOT NULL,
+	  PRIMARY KEY(username)
+);
