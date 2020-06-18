@@ -15,3 +15,12 @@ CREATE TABLE orgs(
 	  orgName VARCHAR(40) NOT NULL,
 	  PRIMARY KEY(orgName)
 );
+
+CREATE TABLE requests(
+	  postid INTEGER NOT NULL,
+	  member VARCHAR(20) NOT NULL,
+	  leader VARCHAR(40) NOT NULL,
+	  service VARCHAR(40) NOT NULL,
+	  filename VARCHAR(64) NOT NULL,
+	  PRIMARY KEY(postid)
+);

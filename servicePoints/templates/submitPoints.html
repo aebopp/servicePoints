@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="/css/style.css">
+        <h1 style="text-align:center">Submit Points</h1>
+        <p>{{username}}</p>
+        <p>{{org}}</p>
+        <p>Hours: {{hours}}</p>
+        <a href="/accounts/index/">Back to Homepage</a>
+    </head>   
+
+    <form action="/accounts/submitPoints/" method="post" enctype="multipart/form-data">
+        <p>
+            <label for="service">Select the type of service:</label>
+    
+            <select name="service" id="service">
+                <option value="mask">Mask-Making</option>
+                <option value="blood">Donating Blood</option>
+                <option value="tutor">Tutoring</option>
+                <option value="food">Donating Food</option>
+            </select>
+        </p> 
+        <p>
+        Photo for proof of service
+        <input type="file" name="file">
+        </p>
+        <p>
+            <input type="submit" name="update" value="submit" />
+          </p>
+    </form>
+</html>
