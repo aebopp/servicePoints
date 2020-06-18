@@ -2,6 +2,8 @@ import hashlib
 import uuid
 import os
 import flask
+import shutil
+import tempfile
 from flask import render_template
 import servicePoints
 APP = flask.Flask(__name__)
@@ -68,10 +70,14 @@ def create():
         if cursor.fetchone() is None:
             return flask.redirect(flask.url_for('orgNotFound'))
 
-        # If a user tries to create an account with an empty string as the
-        # password, abort(400)
-        if password == '':
-            flask.abort(400)
+        if len(str(flask.request.form['password'])) is 0 or len(str(flask.request.form['fullname'])) is 0:
+            return flask.redirect(flask.url_for('incompleteForm', prev="create")) 
+
+        if len(str(flask.request.form['orgName'])) is 0 or len(str(flask.request.form['email'])) is 0:
+            return flask.redirect(flask.url_for('incompleteForm', prev="create")) 
+        
+        if len(str(flask.request.form['username'])) is 0:
+            return flask.redirect(flask.url_for('incompleteForm', prev="create"))
 
         flask.session['username'] = flask.request.form['username']
         flask.session['fullname'] = flask.request.form['fullname']
@@ -285,3 +291,78 @@ def tutorsu():
 
     context = {}
     return render_template('tutor.html', **context)
+
+@servicePoints.app.route('/accounts/submitPoints/', methods=['GET', 'POST'])
+def submitPoints():
+    if flask.request.method == 'POST':
+        dummy, temp_filename = tempfile.mkstemp()
+        file = flask.request.files["file"]
+        serviceType = flask.request.form["service"]
+        file.save(temp_filename)
+
+        # Compute filename
+        hash_txt = sha256sum(temp_filename)
+        dummy, suffix = os.path.splitext(file.filename)
+        hash_filename_basename = hash_txt + suffix
+        hash_filename = os.path.join(
+            servicePoints.app.config["IMAGES_FOLDER"],
+            hash_filename_basename
+        )
+
+        # Move temp file to permanent location
+        shutil.move(temp_filename, hash_filename)
+        cursor = servicePoints.model.get_db()
+        username = flask.session["username"]
+        studentOrgCur = cursor.execute('SELECT orgName FROM users WHERE '
+                        'username =:who',
+                        {"who": username})
+        results = studentOrgCur.fetchone()
+        orgName = results["orgName"]
+        studentOrgLeader = cursor.execute('SELECT username FROM orgs WHERE '
+                        'orgName =:who',
+                        {"who": orgName})
+        results = studentOrgLeader.fetchone()
+        leader = results["username"]
+        cursor.execute('INSERT INTO requests(member, leader, service, filename) VALUES '
+            '(:one,:two,:three,:four)', {"one": username, "two": leader, "three": serviceType, "four": hash_filename_basename})
+        return flask.redirect(flask.url_for('confirmSubmission'))
+    username = flask.session["username"]
+    cursor = servicePoints.model.get_db()
+    studentOrgCur = cursor.execute('SELECT orgName, hours FROM users WHERE '
+                        'username =:who',
+                        {"who": username})
+    results = studentOrgCur.fetchone()
+    context = {'username': username, 'org': results["orgName"], 'hours': results["hours"]}
+    return render_template('submitPoints.html', **context)
+
+@servicePoints.app.route('/accounts/confirmSubmission/', methods=['GET', 'POST'])
+def confirmSubmission():
+    if flask.request.method == 'POST':
+        return flask.redirect(flask.url_for('index'))
+    username = flask.session["username"]
+    cursor = servicePoints.model.get_db()
+    studentOrgCur = cursor.execute('SELECT orgName FROM users WHERE '
+                        'username =:who',
+                        {"who": username})
+    results = studentOrgCur.fetchone()
+    orgName = results["orgName"]
+    studentOrgLeader = cursor.execute('SELECT username FROM orgs WHERE '
+                    'orgName =:who',
+                    {"who": orgName})
+    results = studentOrgLeader.fetchone()
+    leader = results["username"]
+    studentOrgLeaderFull = cursor.execute('SELECT fullname FROM users WHERE '
+                    'username =:who',
+                    {"who": leader})
+    results = studentOrgLeaderFull.fetchone()
+    context = {"leader": results["fullname"]}
+    return render_template('confirmSubmission.html', **context)
+
+
+
+def sha256sum(filename):
+    """Return sha256 hash of file content, similar to UNIX sha256sum."""
+    content = open(filename, 'rb').read()
+    sha256_obj = hashlib.sha256(content)
+    return sha256_obj.hexdigest()
+

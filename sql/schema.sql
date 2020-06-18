@@ -16,10 +16,20 @@ CREATE TABLE orgs(
 	  PRIMARY KEY(orgName)
 );
 
+<<<<<<< HEAD
 
 CREATE TABLE tutors(
 	  username VARCHAR(20) NOT NULL,
 	  subject VARCHAR(40) NOT NULL,
 	  time VARCHAR(80) NOT NULL,
 	  PRIMARY KEY(username)
+=======
+CREATE TABLE requests(
+	  postid INTEGER NOT NULL,
+	  member VARCHAR(20) NOT NULL,
+	  leader VARCHAR(40) NOT NULL,
+	  service VARCHAR(40) NOT NULL,
+	  filename VARCHAR(64) NOT NULL,
+	  PRIMARY KEY(postid)
+>>>>>>> a13a88a5b357d5ce4091c99247484845da5be53e
 );
