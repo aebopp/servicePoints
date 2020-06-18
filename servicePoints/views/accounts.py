@@ -156,7 +156,6 @@ def createOrg():
 
 @servicePoints.app.route('/', methods=['GET', 'POST'])
 def index():
-    """Render index page."""
     if 'username' in flask.session:
         username = flask.session["username"]
         cursor = servicePoints.model.get_db()
