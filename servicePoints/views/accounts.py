@@ -237,7 +237,7 @@ def duplicateOrgName():
 @servicePoints.app.route('/accounts/duplicateTutor/', methods=['GET', 'POST'])
 def duplicateTutor():
     if flask.request.method == 'POST':
-        return flask.redirect(flask.url_for('tutor'))
+        return flask.redirect(flask.url_for('tutorsu'))
     context = {}
     return render_template('duplicateTutor.html', **context)
 
@@ -288,8 +288,20 @@ def tutorsu():
 
         return flask.redirect(flask.url_for('index'))
 
-    context = {}
-    return render_template('tutor.html', **context)
+    cursor = servicePoints.model.get_db()
+
+    cur = cursor.execute("SELECT * FROM tutors")
+    tutors = cur.fetchall()
+
+    username = flask.session["username"]
+    cur2 = cursor.execute('SELECT email FROM users WHERE '
+                    'username =:who',
+                    {"who": username})
+    emails = cur2.fetchall()
+
+    # Add database info to context
+    context = {"tutors": tutors, "emails": emails}
+    return flask.render_template("tutor.html", **context,zip=zip)
 
 @servicePoints.app.route('/accounts/submitPoints/', methods=['GET', 'POST'])
 def submitPoints():
