@@ -263,6 +263,11 @@ def food():
     context = {}
     return render_template('food.html', **context)
 
+@servicePoints.app.route('/accounts/profile/')
+def profile():
+    context = {}
+    return render_template('userProfile.html', **context)
+
 @servicePoints.app.route('/images/<path:filename>', methods=['GET', 'POST'])
 def images(filename):
     if "username" in flask.session:
