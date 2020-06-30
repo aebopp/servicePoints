@@ -253,6 +253,16 @@ def mask():
     context = {}
     return render_template('mask.html', **context)
 
+@servicePoints.app.route('/accounts/blood/')
+def blood():
+    context = {}
+    return render_template('blood.html', **context)
+
+@servicePoints.app.route('/accounts/food/')
+def food():
+    context = {}
+    return render_template('food.html', **context)
+
 @servicePoints.app.route('/images/<path:filename>', methods=['GET', 'POST'])
 def images(filename):
     if "username" in flask.session:
