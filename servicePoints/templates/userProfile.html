@@ -12,7 +12,17 @@
     <a href="/accounts/logout/">logout</a>
     <a href="/accounts/delete/">delete</a>
 
-
+    <form action="/accounts/profile/" method="post">
+        <p>
+            <label for="orgName">Select an Organization:</label>
+            <select name="orgName" id="orgName">
+                {% for org in orgs %}
+                <option value="{{org.orgName}}">{{org.orgName}}</option>
+                {% endfor %}
+            </select>
+        </p>
+        <input type="submit" name="signup" value="Update Org" />
+    </form>
 
 </body>
 

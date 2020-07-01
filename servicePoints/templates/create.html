@@ -1,38 +1,43 @@
 <!DOCTYPE html>
 <html>
 <body>
-<title>ServicePoints</title>
-<p>
-  Want to register an organization with your new account account?
-<a href="/accounts/createOrg/">Register as organization leader</a>
-</p>
+    <title>ServicePoints</title>
+    <p>
+        Want to register an organization with your new account account?
+        <a href="/accounts/createOrg/">Register as organization leader</a>
+    </p>    
 
-  <form action="/accounts/create/" method="post" enctype="multipart/form-data">
+    <form action="/accounts/create/" method="post" enctype="multipart/form-data">
+        <p>
+            <label for="orgName">Select an Organization:</label>
+            <select name="orgName" id="orgName">
+                <option value="NONE">Choose Later</option>
+                {% for org in orgs %}
+                <option value="{{org.orgName}}">{{org.orgName}}</option>
+                {% endfor %}
+            </select>
+        </p>
+        <p>
+            Your Name
+            <input type="text" name="fullname" />
+        </p>
+        <p>
+            Username
+            <input type="text" name="username" />
+        </p>
+        <p>
+            Email
+            <input type="text" name="email" />
+        </p>
+        <p>
+            Password
+            <input type="password" name="password" />
+        </p>
+        <input type="submit" name="signup" value="sign up" />
+    </form>
     <p>
-      Student Organization
-    <input type="text" name="orgName"/>
+        Have an account?
+        <a href="/accounts/login/">Log in</a>
     </p>
-    <p>
-      Your Name
-    <input type="text" name="fullname"/>
-    </p>
-    <p>
-      Username
-    <input type="text" name="username"/>
-    </p>
-    <p>
-      Email
-    <input type="text" name="email"/>
-    </p>
-    <p>
-      Password
-    <input type="password" name="password"/>
-    </p>
-    <input type="submit" name="signup" value="sign up"/>
-  </form>
-  <p>
-    Have an account?
-  <a href="/accounts/login/">Log in</a>
-  </p>
 </body>
 </html>

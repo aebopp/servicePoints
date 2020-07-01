@@ -73,11 +73,8 @@ def create():
         if len(str(flask.request.form['password'])) is 0 or len(str(flask.request.form['fullname'])) is 0:
             return flask.redirect(flask.url_for('incompleteForm', prev="create")) 
 
-        if len(str(flask.request.form['orgName'])) is 0 or len(str(flask.request.form['email'])) is 0:
+        if len(str(flask.request.form['username'])) is 0 or len(str(flask.request.form['email'])) is 0:
             return flask.redirect(flask.url_for('incompleteForm', prev="create")) 
-        
-        if len(str(flask.request.form['username'])) is 0:
-            return flask.redirect(flask.url_for('incompleteForm', prev="create"))
 
         flask.session['username'] = flask.request.form['username']
         flask.session['fullname'] = flask.request.form['fullname']
@@ -95,7 +92,11 @@ def create():
 
         return flask.redirect(flask.url_for('index'))
 
-    context = {}
+    cursor = servicePoints.model.get_db()
+
+    cur = cursor.execute("SELECT * FROM orgs")
+    orgs = cur.fetchall()
+    context = {"orgs": orgs}
     return render_template('create.html', **context)
 
 @servicePoints.app.route('/accounts/createOrg/', methods=['GET', 'POST'])
@@ -263,9 +264,21 @@ def food():
     context = {}
     return render_template('food.html', **context)
 
-@servicePoints.app.route('/accounts/profile/')
+@servicePoints.app.route('/accounts/profile/', methods=['GET', 'POST'])
 def profile():
-    context = {}
+
+    if flask.request.method == 'POST':
+        orgName = str(flask.request.form['orgName'])
+
+        cur = servicePoints.model.get_db()
+        cur.execute('UPDATE users SET orgName = ? WHERE username = ?',
+                                    (orgName, flask.session['username']))
+        return flask.redirect(flask.url_for('index'))
+
+    cursor = servicePoints.model.get_db()
+    cur = cursor.execute("SELECT * FROM orgs")
+    orgs = cur.fetchall()
+    context = {"orgs": orgs}
     return render_template('userProfile.html', **context)
 
 @servicePoints.app.route('/images/<path:filename>', methods=['GET', 'POST'])
@@ -310,8 +323,7 @@ def tutorsu():
 
     username = flask.session["username"]
     cur2 = cursor.execute('SELECT email FROM users WHERE '
-                    'username =:who',
-                    {"who": username})
+                    'username =:who', {"who": username})
     emails = cur2.fetchall()
 
     # Add database info to context
