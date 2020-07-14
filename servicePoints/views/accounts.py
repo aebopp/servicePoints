@@ -233,7 +233,8 @@ def index():
         leaderCur = cursor.execute('SELECT orgName FROM orgs WHERE '
                     'username =:who',
                     {"who": username})
-        if leaderCur.fetchone() is None:
+        tryfetch = leaderCur.fetchone()
+        if tryfetch is None or tryfetch["orgName"] == "NONE":
             leader = 0
         else:
             leader = 1
@@ -345,10 +346,14 @@ def profile():
         orgName = str(flask.request.form['orgName'])
         username = str(flask.session['username'])
         cur = servicePoints.model.get_db()
+        curOrg =          cur.execute('SELECT orgName FROM users WHERE username = ?',
+                                    (username,))
+        org = curOrg.fetchone()
         cur.execute('UPDATE users SET orgName = ? WHERE username = ?',
                                     (orgName, username,))
-        cur.execute('DELETE from orgs WHERE username = ?',
-                                    (username,))
+        if org == "NONE":
+            cur.execute('DELETE from orgs WHERE username = ?',
+                                        (username,))
         leadercur = cur.execute('SELECT username from orgs WHERE orgName = ?',
                                     (orgName,))
         leader = leadercur.fetchone()                            
