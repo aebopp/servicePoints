@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <title>ServicePoints</title>
+    <p>
+        {{org}} members' hours:
+    </p>
+    {% for result in hours %}
+    <p>
+        {{result.fullname}} ({{result.username}}): {{result.hours}}
+    </p>
+    {% endfor %}
+</body>
+</html>

@@ -155,6 +155,24 @@ def createOrg():
     context = {}
     return render_template('createOrg.html', **context)
 
+@servicePoints.app.route('/accounts/viewMemberPoints/', methods=['GET'])
+def viewMemberPoints():
+    if 'username' in flask.session:
+        username = flask.session["username"]
+        cursor = servicePoints.model.get_db()
+        leaderCur = cursor.execute('SELECT orgName FROM orgs WHERE '
+                    'username =:who',
+                    {"who": username})
+        results = leaderCur.fetchone()
+        usersCur = cursor.execute('SELECT username, fullname, hours FROM users WHERE '
+                    'orgName =:who',
+                    {"who": results["orgName"]})
+        hoursResults = usersCur.fetchall()
+        context = {'org': results["orgName"], 'hours': hoursResults}
+        return render_template('viewMemberPoints.html', **context)
+    return flask.redirect(flask.url_for('login'))
+
+
 @servicePoints.app.route('/', methods=['GET', 'POST'])
 def index():
     if 'username' in flask.session:
