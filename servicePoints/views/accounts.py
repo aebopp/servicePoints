@@ -172,6 +172,39 @@ def viewMemberPoints():
         return render_template('viewMemberPoints.html', **context)
     return flask.redirect(flask.url_for('login'))
 
+@servicePoints.app.route('/accounts/viewRequests/', methods=['GET', 'POST'])
+def viewRequests():
+    if 'username' in flask.session:
+        if flask.request.method == 'POST':
+            if 'deny' in flask.request.form:
+                post = flask.request.form["postid"]
+                servicePoints.model.get_db().execute('DELETE FROM requests WHERE postid =:one ', 
+                {"one": post})
+            if 'confirm' in flask.request.form:
+                try:
+                    numHours = int(flask.request.form["numHours"])
+                except:
+                    return flask.redirect(flask.url_for('hourError'))
+                post = flask.request.form["postid"]
+                user = flask.request.form["user"]
+                hours = servicePoints.model.get_db().execute('SELECT hours FROM users WHERE username =:one ', 
+                {"one": user})
+                dbHours = hours.fetchone()
+                dbHours["hours"] += numHours
+                servicePoints.model.get_db().execute('UPDATE users SET hours =:one WHERE username =:two ', 
+                {"one": dbHours["hours"], "two": user})
+                servicePoints.model.get_db().execute('DELETE FROM requests WHERE postid =:one ', 
+                {"one": post})
+
+        username = flask.session["username"]
+        cursor = servicePoints.model.get_db()
+        leaderCur = cursor.execute('SELECT postid, member, service, filename FROM requests WHERE '
+                    'leader =:who',
+                    {"who": username})
+        results = leaderCur.fetchall()
+        context = {'requests': results}
+        return render_template('viewRequests.html', **context)
+    return flask.redirect(flask.url_for('login'))
 
 @servicePoints.app.route('/', methods=['GET', 'POST'])
 def index():
@@ -252,6 +285,14 @@ def duplicateOrgName():
         return flask.redirect(flask.url_for('createOrg'))
     context = {}
     return render_template('duplicateOrgName.html', **context)
+
+@servicePoints.app.route('/accounts/hourError/', methods=['GET', 'POST'])
+def hourError():
+    if flask.request.method == 'POST':
+        return flask.redirect(flask.url_for('viewRequests'))
+    context = {}
+    return render_template('hourError.html', **context)
+
 
 @servicePoints.app.route('/accounts/duplicateTutor/', methods=['GET', 'POST'])
 def duplicateTutor():
