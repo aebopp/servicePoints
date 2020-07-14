@@ -30,4 +30,6 @@ CREATE TABLE requests(
 	  service VARCHAR(40) NOT NULL,
 	  filename VARCHAR(64) NOT NULL,
 	  PRIMARY KEY(postid)
+	  FOREIGN KEY(member) REFERENCES users(username) ON UPDATE CASCADE
+		ON DELETE CASCADE
 );

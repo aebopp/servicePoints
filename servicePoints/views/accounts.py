@@ -488,7 +488,10 @@ def manageOrg():
     if 'username' in flask.session:
         username = flask.session["username"]
         if flask.request.method == 'POST':
-            return flask.redirect(flask.url_for('login'))
+            if 'delete' in flask.request.form:
+                return flask.redirect(flask.url_for('confirmDeleteOrg'))
+            if 'remove' in flask.request.form:
+                return flask.redirect(flask.url_for('confirmRemoveMember'))
         cursor = servicePoints.model.get_db()
         leaderCur = cursor.execute('SELECT orgName FROM orgs WHERE '
                     'username =:who',
