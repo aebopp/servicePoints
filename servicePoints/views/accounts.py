@@ -63,7 +63,7 @@ def create():
         to_add = (name,)
         to_join = (orgName,)
         cursor.execute('SELECT * FROM users WHERE username=?', to_add)
-        if cursor.fetchone() is not None:
+        if cursor.fetchone() is not None or name == "pending":
             return flask.redirect(flask.url_for('duplicateUsername', prev='create'))
 
         cursor.execute('SELECT * FROM orgs WHERE orgName=?', to_join)
@@ -121,6 +121,8 @@ def createOrg():
         to_add = (name,)
         to_addOrg = (orgName,)
         if orgName == "NONE":
+            return flask.redirect(flask.url_for('duplicateOrgName', prev='createOrg'))
+        if name == "pending":
             return flask.redirect(flask.url_for('duplicateUsername', prev='createOrg'))
         cursor.execute('SELECT * FROM users WHERE username=?', to_add)
         if cursor.fetchone() is not None:
@@ -341,10 +343,17 @@ def profile():
 
     if flask.request.method == 'POST':
         orgName = str(flask.request.form['orgName'])
-
+        username = str(flask.session['username'])
         cur = servicePoints.model.get_db()
         cur.execute('UPDATE users SET orgName = ? WHERE username = ?',
-                                    (orgName, flask.session['username']))
+                                    (orgName, username,))
+        cur.execute('DELETE from orgs WHERE username = ?',
+                                    (username,))
+        leadercur = cur.execute('SELECT username from orgs WHERE orgName = ?',
+                                    (orgName,))
+        leader = leadercur.fetchone()                            
+        cur.execute('UPDATE requests SET leader = ? WHERE member = ?',
+                                    (leader["username"], username,))                            
         return flask.redirect(flask.url_for('index'))
 
     cursor = servicePoints.model.get_db()
@@ -428,11 +437,14 @@ def submitPoints():
                         {"who": username})
         results = studentOrgCur.fetchone()
         orgName = results["orgName"]
-        studentOrgLeader = cursor.execute('SELECT username FROM orgs WHERE '
-                        'orgName =:who',
-                        {"who": orgName})
-        results = studentOrgLeader.fetchone()
-        leader = results["username"]
+        if orgName == "NONE":
+            leader = "pending"
+        else:
+            studentOrgLeader = cursor.execute('SELECT username FROM orgs WHERE '
+                            'orgName =:who',
+                            {"who": orgName})
+            results = studentOrgLeader.fetchone()
+            leader = results["username"]
         cursor.execute('INSERT INTO requests(member, leader, service, filename) VALUES '
             '(:one,:two,:three,:four)', {"one": username, "two": leader, "three": serviceType, "four": hash_filename_basename})
         return flask.redirect(flask.url_for('confirmSubmission'))
@@ -456,16 +468,19 @@ def confirmSubmission():
                         {"who": username})
     results = studentOrgCur.fetchone()
     orgName = results["orgName"]
-    studentOrgLeader = cursor.execute('SELECT username FROM orgs WHERE '
-                    'orgName =:who',
-                    {"who": orgName})
-    results = studentOrgLeader.fetchone()
-    leader = results["username"]
-    studentOrgLeaderFull = cursor.execute('SELECT fullname FROM users WHERE '
-                    'username =:who',
-                    {"who": leader})
-    results = studentOrgLeaderFull.fetchone()
-    context = {"leader": results["fullname"]}
+    if orgName == "NONE":
+        context = {"leader": "[when you join a student org, your request will be sent to the student org leader]"}
+    else:
+        studentOrgLeader = cursor.execute('SELECT username FROM orgs WHERE '
+                        'orgName =:who',
+                        {"who": orgName})
+        results = studentOrgLeader.fetchone()
+        leader = results["username"]
+        studentOrgLeaderFull = cursor.execute('SELECT fullname FROM users WHERE '
+                        'username =:who',
+                        {"who": leader})
+        results = studentOrgLeaderFull.fetchone()
+        context = {"leader": results["fullname"]}
     return render_template('confirmSubmission.html', **context)
 
 
