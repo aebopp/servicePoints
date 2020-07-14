@@ -50,9 +50,14 @@
     Username: {{username}}
     <div class="dropdown">
         <button onclick="myFunction()" class="dropbtn">Settings</button>
+
         <div id="myDropdown" class="dropdown-content">
             <a href="/accounts/profile/">Profile</a>
+            {% if leader == 1 %}
+            <a href="/accounts/manageOrg/">Manage Org</a>
+            {% endif %}
             <a href="/accounts/logout/">Logout</a>
+
         </div>
     </div>
 

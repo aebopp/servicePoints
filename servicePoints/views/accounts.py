@@ -483,6 +483,20 @@ def confirmSubmission():
         context = {"leader": results["fullname"]}
     return render_template('confirmSubmission.html', **context)
 
+@servicePoints.app.route('/accounts/manageOrg/', methods=['GET', 'POST'])
+def manageOrg():
+    if 'username' in flask.session:
+        username = flask.session["username"]
+        if flask.request.method == 'POST':
+            return flask.redirect(flask.url_for('login'))
+        cursor = servicePoints.model.get_db()
+        leaderCur = cursor.execute('SELECT orgName FROM orgs WHERE '
+                    'username =:who',
+                    {"who": username})
+        results = leaderCur.fetchone()
+        context = {'org': results["orgName"]}
+        return render_template('manageOrg.html', **context)
+    return flask.redirect(flask.url_for('login'))
 
 
 def sha256sum(filename):
