@@ -20,12 +20,14 @@
         <form action="/accounts/viewRequests/" method="post" enctype="multipart/form-data">
             <input type="hidden" name="postid" value="{{request.postid}}"/>
             <input type="hidden" name="user" value="{{request.member}}"/>
+            <input type="hidden" name="filename" value="{{request.filename}}"/>
             <input type="text" name="numHours" />
             <input type="submit" name="confirm" value="confirm"/>
           </form>
         Please give an explanation as to why you're denying this request:
         <form action="/accounts/viewRequests/" method="post" enctype="multipart/form-data">
             <input type="hidden" name="postid" value="{{request.postid}}"/>
+            <input type="hidden" name="filename" value="{{request.filename}}"/>
             <input type="text" name="reason" />
             <input type="submit" name = "deny" value="deny" />
          </form>

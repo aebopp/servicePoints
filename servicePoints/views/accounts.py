@@ -185,8 +185,11 @@ def viewRequests():
         if flask.request.method == 'POST':
             if 'deny' in flask.request.form:
                 post = flask.request.form["postid"]
+                file = flask.request.form["filename"]
                 servicePoints.model.get_db().execute('DELETE FROM requests WHERE postid =:one ', 
                 {"one": post})
+                os.remove(os.path.join(
+                servicePoints.app.config["IMAGES_FOLDER"], file))
             if 'confirm' in flask.request.form:
                 try:
                     numHours = int(flask.request.form["numHours"])
@@ -194,6 +197,7 @@ def viewRequests():
                     return flask.redirect(flask.url_for('hourError'))
                 post = flask.request.form["postid"]
                 user = flask.request.form["user"]
+                file = flask.request.form["filename"]
                 hours = servicePoints.model.get_db().execute('SELECT hours FROM users WHERE username =:one ', 
                 {"one": user})
                 dbHours = hours.fetchone()
@@ -202,6 +206,8 @@ def viewRequests():
                 {"one": dbHours["hours"], "two": user})
                 servicePoints.model.get_db().execute('DELETE FROM requests WHERE postid =:one ', 
                 {"one": post})
+                os.remove(os.path.join(
+                servicePoints.app.config["IMAGES_FOLDER"], file))
 
         username = flask.session["username"]
         cursor = servicePoints.model.get_db()
