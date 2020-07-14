@@ -68,7 +68,12 @@ def create():
 
         cursor.execute('SELECT * FROM orgs WHERE orgName=?', to_join)
         if cursor.fetchone() is None:
-            return flask.redirect(flask.url_for('orgNotFound'))
+            if orgName == "NONE":
+                orgData = (name, "NONE")
+                cur = servicePoints.model.get_db()
+                cur.execute("INSERT INTO orgs(username, orgName) VALUES (?, ?)", orgData)
+            else:
+                return flask.redirect(flask.url_for('orgNotFound'))
 
         if len(str(flask.request.form['password'])) is 0 or len(str(flask.request.form['fullname'])) is 0:
             return flask.redirect(flask.url_for('incompleteForm', prev="create")) 
@@ -115,6 +120,8 @@ def createOrg():
 
         to_add = (name,)
         to_addOrg = (orgName,)
+        if orgName == "NONE":
+            return flask.redirect(flask.url_for('duplicateUsername', prev='createOrg'))
         cursor.execute('SELECT * FROM users WHERE username=?', to_add)
         if cursor.fetchone() is not None:
             return flask.redirect(flask.url_for('duplicateUsername', prev='createOrg'))
