@@ -22,6 +22,7 @@ CREATE TABLE tutors(
 	  time VARCHAR(80) NOT NULL,
 	  PRIMARY KEY(username)
 );
+
 CREATE TABLE requests(
 	  postid INTEGER NOT NULL,
 	  member VARCHAR(20) NOT NULL,

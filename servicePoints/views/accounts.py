@@ -494,7 +494,10 @@ def manageOrg():
                     'username =:who',
                     {"who": username})
         results = leaderCur.fetchone()
-        context = {'org': results["orgName"]}
+        orgName = results["orgName"]
+        membersCur = cursor.execute('SELECT username, fullname FROM users WHERE orgname =:who', {"who": orgName})
+        members = membersCur.fetchall()
+        context = {'org': orgName, 'members': members, 'username': username}
         return render_template('manageOrg.html', **context)
     return flask.redirect(flask.url_for('login'))
 

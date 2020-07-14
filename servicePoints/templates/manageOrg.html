@@ -1,5 +1,8 @@
 <!DOCTYPE html>
 <html>
+    <head>
+        <a href="/">Home</a>
+    </head>
   <head>
       <link rel="stylesheet" type="text/css" href="/css/style.css">
       <title>ServicePoints</title>
@@ -7,7 +10,24 @@
 
   <body>
     <p>
-      {{org}}
+        <form action="/accounts/manageOrg/" method="post" enctype="multipart/form-data">
+            {{org}}
+            <input type="hidden" name="org" value="{{org}}"/>
+            <input type="submit" name="delete" value="delete your student org"/>
+          </form>
     </p>
+    {% for member in members %}
+        {% if username == member.username %}
+            {{member.fullname}} ({{member.username}})
+        {% else %}
+        <p>
+            <form action="/accounts/manageOrg/" method="post" enctype="multipart/form-data">
+                {{member.fullname}} ({{member.username}})
+                <input type="hidden" name="user" value="{{member.username}}"/>
+                <input type="submit" name="remove" value="remove from org"/>
+              </form>
+    </p>
+    {% endif %}
+    {% endfor %}
   </body>
 </html>
