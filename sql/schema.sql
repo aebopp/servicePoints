@@ -6,7 +6,7 @@ CREATE TABLE users(
 		email VARCHAR(40) NOT NULL,
 		orgName VARCHAR(40) NOT NULL,
 		password VARCHAR(256) NOT NULL,
-		hours VARCHAR(40) NOT NULL,
+		hours INTEGER NOT NULL,
 	  PRIMARY KEY(username)
 );
 
@@ -22,6 +22,7 @@ CREATE TABLE tutors(
 	  time VARCHAR(80) NOT NULL,
 	  PRIMARY KEY(username)
 );
+
 CREATE TABLE requests(
 	  postid INTEGER NOT NULL,
 	  member VARCHAR(20) NOT NULL,
@@ -29,4 +30,6 @@ CREATE TABLE requests(
 	  service VARCHAR(40) NOT NULL,
 	  filename VARCHAR(64) NOT NULL,
 	  PRIMARY KEY(postid)
+	  FOREIGN KEY(member) REFERENCES users(username) ON UPDATE CASCADE
+		ON DELETE CASCADE
 );

@@ -63,8 +63,17 @@ def create():
         to_add = (name,)
         to_join = (orgName,)
         cursor.execute('SELECT * FROM users WHERE username=?', to_add)
-        if cursor.fetchone() is not None:
+        if cursor.fetchone() is not None or name == "pending":
             return flask.redirect(flask.url_for('duplicateUsername', prev='create'))
+
+        cursor.execute('SELECT * FROM orgs WHERE orgName=?', to_join)
+        if cursor.fetchone() is None:
+            if orgName == "NONE":
+                orgData = (name, "NONE")
+                cur = servicePoints.model.get_db()
+                cur.execute("INSERT INTO orgs(username, orgName) VALUES (?, ?)", orgData)
+            else:
+                return flask.redirect(flask.url_for('orgNotFound'))
 
         if len(str(flask.request.form['password'])) is 0 or len(str(flask.request.form['fullname'])) is 0:
             return flask.redirect(flask.url_for('incompleteForm', prev="create")) 
@@ -111,6 +120,10 @@ def createOrg():
 
         to_add = (name,)
         to_addOrg = (orgName,)
+        if orgName == "NONE":
+            return flask.redirect(flask.url_for('duplicateOrgName', prev='createOrg'))
+        if name == "pending":
+            return flask.redirect(flask.url_for('duplicateUsername', prev='createOrg'))
         cursor.execute('SELECT * FROM users WHERE username=?', to_add)
         if cursor.fetchone() is not None:
             return flask.redirect(flask.url_for('duplicateUsername', prev='createOrg'))
@@ -151,6 +164,63 @@ def createOrg():
     context = {}
     return render_template('createOrg.html', **context)
 
+@servicePoints.app.route('/accounts/viewMemberPoints/', methods=['GET'])
+def viewMemberPoints():
+    if 'username' in flask.session:
+        username = flask.session["username"]
+        cursor = servicePoints.model.get_db()
+        leaderCur = cursor.execute('SELECT orgName FROM orgs WHERE '
+                    'username =:who',
+                    {"who": username})
+        results = leaderCur.fetchone()
+        usersCur = cursor.execute('SELECT username, fullname, hours FROM users WHERE '
+                    'orgName =:who',
+                    {"who": results["orgName"]})
+        hoursResults = usersCur.fetchall()
+        context = {'org': results["orgName"], 'hours': hoursResults}
+        return render_template('viewMemberPoints.html', **context)
+    return flask.redirect(flask.url_for('login'))
+
+@servicePoints.app.route('/accounts/viewRequests/', methods=['GET', 'POST'])
+def viewRequests():
+    if 'username' in flask.session:
+        if flask.request.method == 'POST':
+            if 'deny' in flask.request.form:
+                post = flask.request.form["postid"]
+                file = flask.request.form["filename"]
+                servicePoints.model.get_db().execute('DELETE FROM requests WHERE postid =:one ', 
+                {"one": post})
+                os.remove(os.path.join(
+                servicePoints.app.config["IMAGES_FOLDER"], file))
+            if 'confirm' in flask.request.form:
+                try:
+                    numHours = int(flask.request.form["numHours"])
+                except:
+                    return flask.redirect(flask.url_for('hourError'))
+                post = flask.request.form["postid"]
+                user = flask.request.form["user"]
+                file = flask.request.form["filename"]
+                hours = servicePoints.model.get_db().execute('SELECT hours FROM users WHERE username =:one ', 
+                {"one": user})
+                dbHours = hours.fetchone()
+                dbHours["hours"] += numHours
+                servicePoints.model.get_db().execute('UPDATE users SET hours =:one WHERE username =:two ', 
+                {"one": dbHours["hours"], "two": user})
+                servicePoints.model.get_db().execute('DELETE FROM requests WHERE postid =:one ', 
+                {"one": post})
+                os.remove(os.path.join(
+                servicePoints.app.config["IMAGES_FOLDER"], file))
+
+        username = flask.session["username"]
+        cursor = servicePoints.model.get_db()
+        leaderCur = cursor.execute('SELECT postid, member, service, filename FROM requests WHERE '
+                    'leader =:who',
+                    {"who": username})
+        results = leaderCur.fetchall()
+        context = {'requests': results}
+        return render_template('viewRequests.html', **context)
+    return flask.redirect(flask.url_for('login'))
+
 @servicePoints.app.route('/', methods=['GET', 'POST'])
 def index():
     if 'username' in flask.session:
@@ -163,7 +233,8 @@ def index():
         leaderCur = cursor.execute('SELECT orgName FROM orgs WHERE '
                     'username =:who',
                     {"who": username})
-        if leaderCur.fetchone() is None:
+        tryfetch = leaderCur.fetchone()
+        if tryfetch is None or tryfetch["orgName"] == "NONE":
             leader = 0
         else:
             leader = 1
@@ -231,6 +302,14 @@ def duplicateOrgName():
     context = {}
     return render_template('duplicateOrgName.html', **context)
 
+@servicePoints.app.route('/accounts/hourError/', methods=['GET', 'POST'])
+def hourError():
+    if flask.request.method == 'POST':
+        return flask.redirect(flask.url_for('viewRequests'))
+    context = {}
+    return render_template('hourError.html', **context)
+
+
 @servicePoints.app.route('/accounts/duplicateTutor/', methods=['GET', 'POST'])
 def duplicateTutor():
     if flask.request.method == 'POST':
@@ -265,10 +344,21 @@ def profile():
 
     if flask.request.method == 'POST':
         orgName = str(flask.request.form['orgName'])
-
+        username = str(flask.session['username'])
         cur = servicePoints.model.get_db()
+        curOrg =          cur.execute('SELECT orgName FROM users WHERE username = ?',
+                                    (username,))
+        org = curOrg.fetchone()
         cur.execute('UPDATE users SET orgName = ? WHERE username = ?',
-                                    (orgName, flask.session['username']))
+                                    (orgName, username,))
+        if org == "NONE":
+            cur.execute('DELETE from orgs WHERE username = ?',
+                                        (username,))
+        leadercur = cur.execute('SELECT username from orgs WHERE orgName = ?',
+                                    (orgName,))
+        leader = leadercur.fetchone()                            
+        cur.execute('UPDATE requests SET leader = ? WHERE member = ?',
+                                    (leader["username"], username,))                            
         return flask.redirect(flask.url_for('index'))
 
     cursor = servicePoints.model.get_db()
@@ -350,11 +440,14 @@ def submitPoints():
                         {"who": username})
         results = studentOrgCur.fetchone()
         orgName = results["orgName"]
-        studentOrgLeader = cursor.execute('SELECT username FROM orgs WHERE '
-                        'orgName =:who',
-                        {"who": orgName})
-        results = studentOrgLeader.fetchone()
-        leader = results["username"]
+        if orgName == "NONE":
+            leader = "pending"
+        else:
+            studentOrgLeader = cursor.execute('SELECT username FROM orgs WHERE '
+                            'orgName =:who',
+                            {"who": orgName})
+            results = studentOrgLeader.fetchone()
+            leader = results["username"]
         cursor.execute('INSERT INTO requests(member, leader, service, filename) VALUES '
             '(:one,:two,:three,:four)', {"one": username, "two": leader, "three": serviceType, "four": hash_filename_basename})
         return flask.redirect(flask.url_for('confirmSubmission'))
@@ -378,18 +471,41 @@ def confirmSubmission():
                         {"who": username})
     results = studentOrgCur.fetchone()
     orgName = results["orgName"]
-    studentOrgLeader = cursor.execute('SELECT username FROM orgs WHERE '
-                    'orgName =:who',
-                    {"who": orgName})
-    results = studentOrgLeader.fetchone()
-    leader = results["username"]
-    studentOrgLeaderFull = cursor.execute('SELECT fullname FROM users WHERE '
-                    'username =:who',
-                    {"who": leader})
-    results = studentOrgLeaderFull.fetchone()
-    context = {"leader": results["fullname"]}
+    if orgName == "NONE":
+        context = {"leader": "[when you join a student org, your request will be sent to the student org leader]"}
+    else:
+        studentOrgLeader = cursor.execute('SELECT username FROM orgs WHERE '
+                        'orgName =:who',
+                        {"who": orgName})
+        results = studentOrgLeader.fetchone()
+        leader = results["username"]
+        studentOrgLeaderFull = cursor.execute('SELECT fullname FROM users WHERE '
+                        'username =:who',
+                        {"who": leader})
+        results = studentOrgLeaderFull.fetchone()
+        context = {"leader": results["fullname"]}
     return render_template('confirmSubmission.html', **context)
 
+@servicePoints.app.route('/accounts/manageOrg/', methods=['GET', 'POST'])
+def manageOrg():
+    if 'username' in flask.session:
+        username = flask.session["username"]
+        if flask.request.method == 'POST':
+            if 'delete' in flask.request.form:
+                return flask.redirect(flask.url_for('confirmDeleteOrg'))
+            if 'remove' in flask.request.form:
+                return flask.redirect(flask.url_for('confirmRemoveMember'))
+        cursor = servicePoints.model.get_db()
+        leaderCur = cursor.execute('SELECT orgName FROM orgs WHERE '
+                    'username =:who',
+                    {"who": username})
+        results = leaderCur.fetchone()
+        orgName = results["orgName"]
+        membersCur = cursor.execute('SELECT username, fullname FROM users WHERE orgname =:who', {"who": orgName})
+        members = membersCur.fetchall()
+        context = {'org': orgName, 'members': members, 'username': username}
+        return render_template('manageOrg.html', **context)
+    return flask.redirect(flask.url_for('login'))
 
 
 def sha256sum(filename):
