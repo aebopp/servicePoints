@@ -91,7 +91,7 @@
                 <label for="subjects"><b>Tutoring Subject(s)</b></label>
                 <input type="text" placeholder="Enter Subject(s)" name="subjects" required>
 
-                <label for="time"><b>Available Times</b></label>
+                <label for="time"><b>Available Times (Day of the week: time)</b></label>
                 <input type="text" placeholder="Enter Times" name="time" required>
 
                 <div class="clearfix">
@@ -104,10 +104,14 @@
 
     <hr>
 
-    <h3>Username, Subject, Time, Email</h3>
+    <h1>Welcome to the Service Points Tutoring page!</h1>
+
+    <p>Search through our database of current tutors or sign up to have your name and information listed.</p>
+
+    <h3>Name, Subject(s), Time, Email</h3>
     <p>
-        {% for tutor, email_ in zip(tutors, emails) %}
-        <p>{{tutor.username}}, {{tutor.subject}}, {{tutor.time}}, {{email_.email}}</p>
+        {% for tutor, user in zip(tutors, tutorsN) %}
+        <p>{{user.fullname}}, {{tutor.subject}}, {{tutor.time}}, {{user.email}}</p>
         {% endfor %}
     </p>
 

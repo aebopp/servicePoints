@@ -66,10 +66,6 @@ def create():
         if cursor.fetchone() is not None:
             return flask.redirect(flask.url_for('duplicateUsername', prev='create'))
 
-        cursor.execute('SELECT * FROM orgs WHERE orgName=?', to_join)
-        if cursor.fetchone() is None:
-            return flask.redirect(flask.url_for('orgNotFound'))
-
         if len(str(flask.request.form['password'])) is 0 or len(str(flask.request.form['fullname'])) is 0:
             return flask.redirect(flask.url_for('incompleteForm', prev="create")) 
 
@@ -318,16 +314,14 @@ def tutorsu():
 
     cursor = servicePoints.model.get_db()
 
-    cur = cursor.execute("SELECT * FROM tutors")
+    cur = cursor.execute("SELECT subject, time FROM tutors")
     tutors = cur.fetchall()
 
-    username = flask.session["username"]
-    cur2 = cursor.execute('SELECT email FROM users WHERE '
-                    'username =:who', {"who": username})
-    emails = cur2.fetchall()
+    cur2 = cursor.execute('SELECT fullname, email FROM users WHERE username IN (SELECT username FROM tutors)')
+    tutorsN = cur2.fetchall()
 
     # Add database info to context
-    context = {"tutors": tutors, "emails": emails}
+    context = {"tutors": tutors, "tutorsN": tutorsN}
     return flask.render_template("tutor.html", **context,zip=zip)
 
 @servicePoints.app.route('/accounts/submitPoints/', methods=['GET', 'POST'])
