@@ -437,32 +437,43 @@ def images(filename):
 def tutorsu():
 
     if flask.request.method == 'POST':
-      
-        flask.session['subjects'] = flask.request.form['subjects']
-        flask.session['time'] = flask.request.form['time']
-        cursor = servicePoints.model.get_db().cursor()
-        name = str(flask.session['username'])
+        if 'sign' in flask.request.form:
+            flask.session['subjects'] = flask.request.form['subjects']
+            flask.session['time'] = flask.request.form['time']
+            cursor = servicePoints.model.get_db().cursor()
+            name = str(flask.session['username'])
 
-        to_add = (name,)
-        cursor.execute('SELECT * FROM tutors WHERE username=?', to_add)
-        if cursor.fetchone() is not None:
-            return flask.redirect(flask.url_for('duplicateTutor'))
+            # If a user tries to sign up with any empty fields
+            if flask.session['time'] == '':
+                return flask.redirect(flask.url_for('incompleteForm', prev="tutorsu")) 
+            if flask.session['subjects'] == '':
+                return flask.redirect(flask.url_for('incompleteForm', prev="tutorsu")) 
 
-        # If a user tries to sign up with any empty fields
-        if flask.session['time'] == '':
-            return flask.redirect(flask.url_for('incompleteForm', prev="tutorsu")) 
-        if flask.session['subjects'] == '':
-            return flask.redirect(flask.url_for('incompleteForm', prev="tutorsu")) 
+            data = (flask.session['username'], flask.session['subjects'],
+                    flask.session['time'])
 
-        data = (flask.session['username'], flask.session['subjects'],
-                flask.session['time'])
-        cur = servicePoints.model.get_db()
-        cur.execute("INSERT INTO tutors(username, subject, time) VALUES (?, ?, ?)", data)
 
-        return flask.redirect(flask.url_for('index'))
+            to_add = (name,)
+            cursor.execute('SELECT * FROM tutors WHERE username=?', to_add)
+            if cursor.fetchone() is not None:
+                cur = servicePoints.model.get_db()
+                cur.execute("UPDATE tutors SET username = ?, subject=?, time=?", data)
+            else:
+                cur = servicePoints.model.get_db()
+                cur.execute("INSERT INTO tutors(username, subject, time) VALUES (?, ?, ?)", data)
+
+            return flask.redirect(flask.url_for('tutorsu'))
+
+    cursor = servicePoints.model.get_db().cursor()
+    name = str(flask.session['username'])
+    to_add = (name,)
+    cursor.execute('SELECT * FROM tutors WHERE username=?', to_add)
+    if cursor.fetchone() is not None:
+        registered = 1
+    else:
+        registered = 0
 
     cursor = servicePoints.model.get_db()
-
     cur = cursor.execute("SELECT subject, time FROM tutors")
     tutors = cur.fetchall()
 
@@ -470,7 +481,7 @@ def tutorsu():
     tutorsN = cur2.fetchall()
 
     # Add database info to context
-    context = {"tutors": tutors, "tutorsN": tutorsN}
+    context = {"tutors": tutors, "tutorsN": tutorsN, "registered": registered}
     return flask.render_template("tutor.html", **context,zip=zip)
 
 @servicePoints.app.route('/accounts/submitPoints/', methods=['GET', 'POST'])

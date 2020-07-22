@@ -58,7 +58,7 @@
     }
 
     .su {
-        float: right;
+        text-align:center;
     }
 
     /* Clear floats */
@@ -73,10 +73,6 @@
 <body>
     <a href="/">Home</a>
     <title>ServicePoints</title>
-
-    <div class="su">
-        <button onclick="document.getElementById('id01').style.display='block'" style="width:auto; right: 35px">Sign Up</button>
-    </div>
 
     <div id="id01" class="modal">
         <span onclick="document.getElementById('id01').style.display='none'" class="close" title="Close Modal">&times;</span>
@@ -95,8 +91,11 @@
                 <input type="text" placeholder="Enter Times" name="time" required>
 
                 <div class="clearfix">
+
                     <button type="button" onclick="document.getElementById('id01').style.display='none'" class="cancelbtn">Cancel</button>
-                    <button type="submit" class="signup">Sign Up</button>
+                    <form action="/accounts/tutor/" method="post">
+                        <input type="submit" class="signup" name="sign" value="Sign Up" />
+                    </form>
                 </div>
             </div>
         </form>
@@ -106,7 +105,23 @@
 
     <h1>Welcome to the Service Points Tutoring page!</h1>
 
+    {% if registered == 0 %}
+
     <p>Search through our database of current tutors or sign up to have your name and information listed.</p>
+
+    <div class="su">
+        <button onclick="document.getElementById('id01').style.display='block'" style="width:auto; right: 35px">Sign Up</button>
+    </div>
+
+    {% endif %}
+
+    {% if registered == 1 %}
+    <p>Search through our database of current tutors or edit your listed information.</p>
+    <div class="su">
+        <button onclick="document.getElementById('id01').style.display='block'" style="width:auto; right: 35px">Edit Information</button>
+        <button value='delete' type="submit" class="signup">Delete Profile</button>
+    </div>
+    {% endif %}
 
     <h3>Name, Subject(s), Time, Email</h3>
     <p>
