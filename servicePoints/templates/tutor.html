@@ -67,15 +67,70 @@
         clear: both;
         display: table;
     }
+
+    .listing {
+        float: left;
+        display: block;
+        padding: 14px 16px;
+        margin: 10px;
+        border-radius: 7px;
+        border: 3px solid black;
+    }
+
+    .topnav {
+        background-color: #333;
+        position: fixed;
+        top: 0;
+        width: 100%;
+    }
+
+    main {
+        margin-top: 75px;
+    }
+
+    .topitem {
+        color: #f2f2f2;
+        float: left;
+        display: block;
+        font-size: 16px;
+        padding: 14px 16px;
+    }
+
+    .topmenu {
+        font-size: 16px;
+        padding: 14px 16px;
+        position: relative;
+        display: inline-block;
+        float: right;
+    }
+
+        .topmenu a {
+            color: #f2f2f2;
+        }
+
 </style>
 
 
 <body>
-    <a href="/">Home</a>
     <title>ServicePoints</title>
 
-    <div class="su">
-        <button onclick="document.getElementById('id01').style.display='block'" style="width:auto; right: 35px">Sign Up</button>
+
+    <div class="topnav">
+        <div class="topitem">
+            Username: {{username}}
+        </div>
+        <div class="topitem">
+            Organization: {{org}}
+        </div>
+        <div class="topitem">
+            Hours: {{hours}}
+        </div>
+        <div class="topmenu">
+            <button onclick="document.getElementById('id01').style.display='block'" style="width:auto; right: 35px">Sign Up</button>
+        </div>
+        <div class="topmenu">
+            <a href="/">Home</a>
+        </div>
     </div>
 
     <div id="id01" class="modal">
@@ -102,18 +157,22 @@
         </form>
     </div>
 
-    <hr>
+    <main>
+        <h1>Welcome to the Service Points Tutoring page!</h1>
 
-    <h1>Welcome to the Service Points Tutoring page!</h1>
+        <p>Search through our database of current tutors or sign up to have your name and information listed.</p>
 
-    <p>Search through our database of current tutors or sign up to have your name and information listed.</p>
-
-    <h3>Name, Subject(s), Time, Email</h3>
-    <p>
-        {% for tutor, user in zip(tutors, tutorsN) %}
-        <p>{{user.fullname}}, {{tutor.subject}}, {{tutor.time}}, {{user.email}}</p>
-        {% endfor %}
-    </p>
+        <p>
+            {% for tutor, user in zip(tutors, tutorsN) %}
+            <div class="listing">
+                {{user.fullname}}<br />
+                Subjects: {{tutor.subject}}<br />
+                Available Times: {{tutor.time}}<br />
+                Contact Email: {{user.email}}
+            </div>
+            {% endfor %}
+        </p>
+    </main>
 
 </body>
 </html>
