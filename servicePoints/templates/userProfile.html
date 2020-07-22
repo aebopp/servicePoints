@@ -5,23 +5,68 @@
     <title>Profile</title>
 
     <a href="/">Home</a>
+    <a href="/accounts/logout/" style="float: right;">logout</a>
 </head>
 <body>
     <h1 style="text-align:center">Profile</h1>
 
-    <a href="/accounts/logout/">logout</a>
-    <a href="/accounts/delete/">delete</a>
 
+    <p>
+        Full Name: {{fullname}}
+    </p>
+    {% if pending == 0 %}
+    <p>
+        Student Organization: {{org}}
+        </p>
+        {%endif%}
+        {% if pending == 1 %}
+        <p>
+        Student Organization: Your request is pending. Requesting to join another organization while your request is pending will cancel your original request.
+    </p>
+        {%endif%}
+    </p>
+    <p>
+        Email: {{email}}
+    </p>
+    <a href="/accounts/delete/">delete account</a>
+
+    {% if leader == 0 %}
     <form action="/accounts/profile/" method="post">
         <p>
             <label for="orgName">Select an Organization:</label>
             <select name="orgName" id="orgName">
                 {% for org in orgs %}
+                {% if org.orgName != 'NONE' %}
                 <option value="{{org.orgName}}">{{org.orgName}}</option>
+                {%endif%}
                 {% endfor %}
             </select>
-        </p>
         <input type="submit" name="signup" value="Update Org" />
+        </p>
+    </form>
+    <form action="/accounts/profile/" method="post">
+    <p>
+        <input type="submit" name="noOrg" value="Leave Organization Without Joining Another" />
+    </p>
+</form>
+    {% endif %}
+
+    <form action="/accounts/profile/" method="post">
+        <p>
+            Change your full name:
+            <input type="text" name="fullname" />
+            <input type="submit" name="fullname" value="Change Full Name" />
+        </p>
+
+    </form>
+
+    <form action="/accounts/profile/" method="post">
+        <p>
+            Change your email:
+            <input type="text" name="email" />
+            <input type="submit" name="email" value="Change Email" />
+        </p>
+
     </form>
 
 </body>

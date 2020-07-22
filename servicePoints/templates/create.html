@@ -6,14 +6,19 @@
         Want to register an organization with your new account account?
         <a href="/accounts/createOrg/">Register as organization leader</a>
     </p>    
-
+<p>
+    Once you select an organization to join, a request will be sent for approval.
+    Until approved, your organization will appear as 'None.'
+</p>
     <form action="/accounts/create/" method="post" enctype="multipart/form-data">
         <p>
             <label for="orgName">Select an Organization:</label>
             <select name="orgName" id="orgName">
                 <option value="NONE">Choose Later</option>
                 {% for org in orgs %}
+                {% if org.orgName != 'NONE' %}
                 <option value="{{org.orgName}}">{{org.orgName}}</option>
+                {%endif%}
                 {% endfor %}
             </select>
         </p>

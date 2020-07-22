@@ -16,11 +16,24 @@ CREATE TABLE orgs(
 	  PRIMARY KEY(orgName)
 );
 
+CREATE TABLE pendingOrgs(
+	  username VARCHAR(20) NOT NULL,
+	  fullname VARCHAR(40) NOT NULL,
+	  email VARCHAR(40) NOT NULL,
+	  orgName VARCHAR(40) NOT NULL,
+          hours INTEGER NOT NULL,
+	  PRIMARY KEY(username)
+	  FOREIGN KEY(username) REFERENCES users(username) ON UPDATE CASCADE
+		ON DELETE CASCADE
+);
+
 CREATE TABLE tutors(
 	  username VARCHAR(20) NOT NULL,
 	  subject VARCHAR(40) NOT NULL,
 	  time VARCHAR(80) NOT NULL,
 	  PRIMARY KEY(username)
+	  FOREIGN KEY(username) REFERENCES users(username) ON UPDATE CASCADE
+		ON DELETE CASCADE
 );
 
 CREATE TABLE requests(

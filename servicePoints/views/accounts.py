@@ -66,6 +66,13 @@ def create():
         if cursor.fetchone() is not None or name == "pending":
             return flask.redirect(flask.url_for('duplicateUsername', prev='create'))
 
+
+        if len(str(flask.request.form['password'])) is 0 or len(str(flask.request.form['fullname'])) is 0:
+            return flask.redirect(flask.url_for('incompleteForm', prev="create")) 
+
+        if len(str(flask.request.form['username'])) is 0 or len(str(flask.request.form['email'])) is 0:
+            return flask.redirect(flask.url_for('incompleteForm', prev="create")) 
+
         cursor.execute('SELECT * FROM orgs WHERE orgName=?', to_join)
         if cursor.fetchone() is None:
             if orgName == "NONE":
@@ -75,12 +82,6 @@ def create():
             else:
                 return flask.redirect(flask.url_for('orgNotFound'))
 
-        if len(str(flask.request.form['password'])) is 0 or len(str(flask.request.form['fullname'])) is 0:
-            return flask.redirect(flask.url_for('incompleteForm', prev="create")) 
-
-        if len(str(flask.request.form['username'])) is 0 or len(str(flask.request.form['email'])) is 0:
-            return flask.redirect(flask.url_for('incompleteForm', prev="create")) 
-
         flask.session['username'] = flask.request.form['username']
         flask.session['fullname'] = flask.request.form['fullname']
         flask.session['orgName'] = flask.request.form['orgName']
@@ -89,11 +90,15 @@ def create():
 
         pw = hash_pass(flask.session['password'])
         data = (flask.session['username'], flask.session['fullname'],
-                flask.session['email'], flask.session['orgName'],
+                flask.session['email'], 'NONE',
                 pw, 0)
+        pendingData = (flask.session['username'], flask.session['fullname'],
+                flask.session['email'], flask.session['orgName'], 0)
         cur = servicePoints.model.get_db()
         cur.execute("INSERT INTO users(username, fullname, email, orgName, "
                     "password, hours) VALUES (?, ?, ?, ?, ?, ?)", data)
+        cur.execute("INSERT INTO pendingOrgs(username, fullname, email, orgName, "
+                    "hours) VALUES (?, ?, ?, ?, ?)", pendingData)
 
         return flask.redirect(flask.url_for('index'))
 
@@ -343,28 +348,82 @@ def food():
 def profile():
 
     if flask.request.method == 'POST':
-        orgName = str(flask.request.form['orgName'])
-        username = str(flask.session['username'])
-        cur = servicePoints.model.get_db()
-        curOrg =          cur.execute('SELECT orgName FROM users WHERE username = ?',
-                                    (username,))
-        org = curOrg.fetchone()
-        cur.execute('UPDATE users SET orgName = ? WHERE username = ?',
-                                    (orgName, username,))
-        if org == "NONE":
-            cur.execute('DELETE from orgs WHERE username = ?',
+        if 'orgName' in flask.request.form:
+            orgName = str(flask.request.form['orgName'])
+            username = str(flask.session['username'])
+            cur = servicePoints.model.get_db()
+            curOrg =          cur.execute('SELECT orgName FROM users WHERE username = ?',
                                         (username,))
-        leadercur = cur.execute('SELECT username from orgs WHERE orgName = ?',
-                                    (orgName,))
-        leader = leadercur.fetchone()                            
-        cur.execute('UPDATE requests SET leader = ? WHERE member = ?',
-                                    (leader["username"], username,))                            
-        return flask.redirect(flask.url_for('index'))
+            org = curOrg.fetchone()
+            curOrg =          cur.execute('SELECT fullname, email, hours FROM users WHERE username = ?',
+                                        (username,))  
+            userInfo = curOrg.fetchone()          
+            pendingData = (flask.session['username'], userInfo['fullname'],
+                userInfo['email'], orgName, userInfo['hours'])
+            cursor = cur.execute('SELECT * FROM pendingOrgs WHERE username =:who', {"who": username})
+            tryfetch = cursor.fetchone()
+            if tryfetch is not None:
+                cur.execute("DELETE from pendingOrgs WHERE username = ?", (username,))
+            cur.execute("INSERT INTO pendingOrgs(username, fullname, email, orgName, "
+                    "hours) VALUES (?, ?, ?, ?, ?)", pendingData)
+            if org == "NONE":
+                cur.execute('DELETE from orgs WHERE username = ?',
+                                            (username,))
+            leadercur = cur.execute('SELECT username from orgs WHERE orgName = ?',
+                                        (orgName,))
+            leader = leadercur.fetchone()                            
+            cur.execute('UPDATE requests SET leader = ? WHERE member = ?',
+                                        (leader["username"], username,))
+        elif 'noOrg' in flask.request.form:
+            username = str(flask.session['username'])
+            cur = servicePoints.model.get_db()
+            cursor = cur.execute('SELECT * FROM pendingOrgs WHERE username =:who', {"who": username})
+            tryfetch = cursor.fetchone()
+            if tryfetch is not None:
+                cur.execute("DELETE from pendingOrgs WHERE username = ?", (username,))
+            cur.execute("UPDATE users SET orgName = 'NONE' WHERE username = ?",
+                                        (username,))
+            cur.execute("UPDATE requests SET leader = 'pending' WHERE member = ?",
+                                        (username,))
+        elif 'fullname' in flask.request.form: 
+            fullName = str(flask.request.form['fullname'])
+            username = str(flask.session['username'])
+            cur = servicePoints.model.get_db()
+            cur.execute('UPDATE users SET fullname = ? WHERE username = ?',
+                                        (fullName, username,))
+        elif 'email' in flask.request.form: 
+            email = str(flask.request.form['email'])
+            username = str(flask.session['username'])
+            cur = servicePoints.model.get_db()
+            cur.execute('UPDATE users SET email = ? WHERE username = ?',
+                                        (email, username,))                           
 
     cursor = servicePoints.model.get_db()
     cur = cursor.execute("SELECT * FROM orgs")
+    username = flask.session['username']
     orgs = cur.fetchall()
-    context = {"orgs": orgs}
+    cur = cursor.execute("SELECT fullname, email, orgName from users WHERE username = ?", (username,))
+    user = cur.fetchone()
+    studentOrgCur = cursor.execute('SELECT orgName, hours FROM users WHERE '
+                            'username =:who',
+                            {"who": username})
+    results = studentOrgCur.fetchone()
+    leaderCur = cursor.execute('SELECT orgName FROM orgs WHERE '
+                    'username =:who',
+                    {"who": username})
+    tryfetch = leaderCur.fetchone()
+    if tryfetch is None or tryfetch["orgName"] == "NONE":
+        leader = 0
+    else:
+        leader = 1
+    cur = cursor.execute('SELECT * FROM pendingOrgs WHERE username =:who', {"who": username})
+    tryfetch = cur.fetchone()
+    if tryfetch is None:
+        pending = 0
+    else:
+        pending = 1
+    context = {"orgs": orgs, "fullname": user["fullname"], "email": user["email"], 
+        "org": user["orgName"], "leader": leader, "pending": pending}
     return render_template('userProfile.html', **context)
 
 @servicePoints.app.route('/images/<path:filename>', methods=['GET', 'POST'])
@@ -492,9 +551,36 @@ def manageOrg():
         username = flask.session["username"]
         if flask.request.method == 'POST':
             if 'delete' in flask.request.form:
-                return flask.redirect(flask.url_for('confirmDeleteOrg'))
+                cursor = servicePoints.model.get_db()
+                leaderCur = cursor.execute('SELECT orgName FROM orgs WHERE '
+                    'username =:who',
+                    {"who": username})
+                results = leaderCur.fetchone()
+                orgName = results["orgName"]
+                cursor.execute("DELETE from orgs WHERE orgName = ?", (orgName,))
+                cursor.execute("UPDATE users SET orgName = 'NONE' WHERE orgName = ?", (orgName,))
+                cursor.execute("UPDATE requests SET leader = 'pending' WHERE leader = ?",
+                                        (username,))
+                return flask.redirect(flask.url_for('index'))
+            if 'add' in flask.request.form:
+                cursor = servicePoints.model.get_db()
+                leaderCur = cursor.execute('SELECT orgName FROM orgs WHERE '
+                    'username =:who',
+                    {"who": username})
+                results = leaderCur.fetchone()
+                orgName = results["orgName"]                
+                cursor.execute("DELETE from pendingOrgs WHERE username = ?", (flask.request.form["user"],))
+                cursor.execute('UPDATE users SET orgName = ? WHERE username = ? ', (orgName, flask.request.form["user"],))
+                cursor.execute("UPDATE requests SET leader = ? WHERE member = ?",
+                                        (username, flask.request.form["user"],))
+            if 'deny' in flask.request.form:
+                cursor = servicePoints.model.get_db()
+                cursor.execute("DELETE from pendingOrgs WHERE username = ?", (flask.request.form["user"],))
             if 'remove' in flask.request.form:
-                return flask.redirect(flask.url_for('confirmRemoveMember'))
+                cursor = servicePoints.model.get_db()
+                cursor.execute("UPDATE users SET orgName = 'NONE' WHERE username = ? ", (flask.request.form["user"],))
+                cursor.execute("UPDATE requests SET leader = 'pending' WHERE member = ?",
+                                        (flask.request.form["user"],))
         cursor = servicePoints.model.get_db()
         leaderCur = cursor.execute('SELECT orgName FROM orgs WHERE '
                     'username =:who',
@@ -503,7 +589,11 @@ def manageOrg():
         orgName = results["orgName"]
         membersCur = cursor.execute('SELECT username, fullname FROM users WHERE orgname =:who', {"who": orgName})
         members = membersCur.fetchall()
-        context = {'org': orgName, 'members': members, 'username': username}
+        pendingCur = cursor.execute('SELECT username, fullname, email, hours FROM pendingOrgs WHERE '
+                    'orgName =:who',
+                    {"who": orgName})
+        pending = pendingCur.fetchall()
+        context = {'org': orgName, 'members': members, 'username': username, 'pending': pending}
         return render_template('manageOrg.html', **context)
     return flask.redirect(flask.url_for('login'))
 

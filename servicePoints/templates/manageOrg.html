@@ -16,6 +16,26 @@
             <input type="submit" name="delete" value="delete your student org"/>
           </form>
     </p>
+    <p>
+    Pending Member Requests:
+  </p>
+  {% for member in pending %}
+        <p>
+            <form action="/accounts/manageOrg/" method="post" enctype="multipart/form-data">
+              Name: {{member.fullname}}
+              <br>Username: {{member.username}}
+              <br>Email: {{member.email}}
+              <br>Pre-Existing Hours: {{member.hours}}
+                <input type="hidden" name="user" value="{{member.username}}"/>
+                <input type="submit" name="add" value="Add Member"/>
+                <input type="submit" name="deny" value="Deny Member"/>
+              </form>
+    </p>
+    {% endfor %}
+
+  <p>
+    Current Members: 
+  </p>
     {% for member in members %}
         {% if username == member.username %}
             {{member.fullname}} ({{member.username}})
