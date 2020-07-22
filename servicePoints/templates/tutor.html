@@ -67,12 +67,68 @@
         clear: both;
         display: table;
     }
+
+    .listing {
+        float: left;
+        display: block;
+        padding: 14px 16px;
+        margin: 10px;
+        border-radius: 7px;
+        border: 3px solid black;
+    }
+
+    .topnav {
+        background-color: #333;
+        position: fixed;
+        top: 0;
+        width: 100%;
+    }
+
+    main {
+        margin-top: 75px;
+    }
+
+    .topitem {
+        color: #f2f2f2;
+        float: left;
+        display: block;
+        font-size: 16px;
+        padding: 14px 16px;
+    }
+
+    .topmenu {
+        font-size: 16px;
+        padding: 14px 16px;
+        position: relative;
+        display: inline-block;
+        float: right;
+    }
+
+        .topmenu a {
+            color: #f2f2f2;
+        }
+
 </style>
 
 
 <body>
-    <a href="/">Home</a>
     <title>ServicePoints</title>
+
+
+    <div class="topnav">
+        <div class="topitem">
+            Username: {{username}}
+        </div>
+        <div class="topitem">
+            Organization: {{org}}
+        </div>
+        <div class="topitem">
+            Hours: {{hours}}
+        </div>
+        <div class="topmenu">
+            <a href="/">Home</a>
+        </div>
+    </div>
 
     <div id="id01" class="modal">
         <span onclick="document.getElementById('id01').style.display='none'" class="close" title="Close Modal">&times;</span>
@@ -81,8 +137,6 @@
                 <h1>Sign Up</h1>
                 <p>Please fill in this form to sign up as a tutor.</p>
                 <hr>
-                <label for="name"><b>Full Name</b></label>
-                <input type="text" placeholder="Enter Full Name" name="name" required>
 
                 <label for="subjects"><b>Tutoring Subject(s)</b></label>
                 <input type="text" placeholder="Enter Subject(s)" name="subjects" required>
@@ -93,7 +147,7 @@
                 <div class="clearfix">
 
                     <button type="button" onclick="document.getElementById('id01').style.display='none'" class="cancelbtn">Cancel</button>
-                    <form action="/accounts/tutor/" method="post">
+                    <form action="/accounts/tutorsu/" method="post">
                         <input type="submit" class="signup" name="sign" value="Sign Up" />
                     </form>
                 </div>
@@ -101,34 +155,34 @@
         </form>
     </div>
 
-    <hr>
-
-    <h1>Welcome to the Service Points Tutoring page!</h1>
-
-    {% if registered == 0 %}
-
-    <p>Search through our database of current tutors or sign up to have your name and information listed.</p>
-
-    <div class="su">
-        <button onclick="document.getElementById('id01').style.display='block'" style="width:auto; right: 35px">Sign Up</button>
-    </div>
-
-    {% endif %}
-
-    {% if registered == 1 %}
+    <main>
+        <h1>Welcome to the Service Points Tutoring page!</h1>
+        {% if registered == 0 %}
+        <p>Search through our database of current tutors or sign up to have your name and information listed.</p>
+        <div class="su">
+            <button onclick="document.getElementById('id01').style.display='block'" style="width:auto; right: 35px">Sign Up</button>
+        </div>
+        {% endif %}
+        {% if registered == 1 %}
     <p>Search through our database of current tutors or edit your listed information.</p>
     <div class="su">
         <button onclick="document.getElementById('id01').style.display='block'" style="width:auto; right: 35px">Edit Information</button>
-        <button value='delete' type="submit" class="signup">Delete Profile</button>
+        <form action="/accounts/tutorsu/" method="post">
+            <input type="submit" class="signup" name="delete" value="Delete Profile" />
+        </form>
     </div>
     {% endif %}
-
-    <h3>Name, Subject(s), Time, Email</h3>
-    <p>
-        {% for tutor, user in zip(tutors, tutorsN) %}
-        <p>{{user.fullname}}, {{tutor.subject}}, {{tutor.time}}, {{user.email}}</p>
-        {% endfor %}
-    </p>
+        <p>
+            {% for tutor, user in zip(tutors, tutorsN) %}
+            <div class="listing">
+                {{user.fullname}}<br />
+                Subjects: {{tutor.subject}}<br />
+                Available Times: {{tutor.time}}<br />
+                Contact Email: {{user.email}}
+            </div>
+            {% endfor %}
+        </p>
+    </main>
 
 </body>
 </html>

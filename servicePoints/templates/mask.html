@@ -14,32 +14,85 @@
             padding: 10px;
         }
 
-    </style>
+        .topnav {
+            background-color: #333;
+            position: fixed;
+            top: 0;
+            width: 100%;
+        }
 
-    <a href="/">Home</a>
+            .topnav button:hover {
+                background: rgba(0,0,0,0.2);
+            }
+
+        main {
+            margin-top: 75px;
+        }
+
+        .topitem {
+            color: #f2f2f2;
+            float: left;
+            display: block;
+            font-size: 16px;
+            padding: 14px 16px;
+        }
+
+        .topmenu {
+            font-size: 16px;
+            padding: 14px 16px;
+            position: relative;
+            display: inline-block;
+            float: right;
+        }
+
+            .topmenu a {
+                color: #f2f2f2;
+            }
+
+    </style>
 </head>
 <body>
-    <h1 style="text-align:center">How to Make and Donate Masks</h1>
 
-    <div>
-        <div class="column" style="border-right:1px solid;">
-            <h2 style="text-align:center">How to Make Masks</h2>
-            <p>Linked below is a video tutorial for making masks with simple materials that can be bought cheaply or found around the home.
-            </p>
-            <div style="text-align:center">
-                <iframe width="560" height="315" src="https://www.youtube.com/embed/VgHrnS6n4iA" frameborder="0"
-                        allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-            </div>
+    <div class="topnav">
+        <div class="topitem">
+            Username: {{username}}
         </div>
-        <div class="column">
-            <h2 style="text-align:center">Where to donate masks</h2>
-            <p>Find places can be tricky as the stock in masks rises around the country. Donations can still be useful for organizations or communities
-            that might not be able to purchase masks. Places to donate in your local area can be found through some searches on google.</p>
-            <p>Some links that might be useful: </p>
-            <a href="https://deaconess.com/How-to-make-a-Face-Mask/Mask-Donations?state=Michigan">Deaconess</a>
+        <div class="topitem">
+            Organization: {{org}}
+        </div>
+        <div class="topitem">
+            Hours: {{hours}}
+        </div>
+        <div class="topmenu">
+            <a href="/">Home</a>
         </div>
     </div>
-  
+    <main>
+        <h1 style="text-align:center">How to Make and Donate Masks</h1>
+
+        <div>
+            <div class="column" style="border-right:1px solid;">
+                <h2 style="text-align:center">How to Make Masks</h2>
+                <p>
+                    Linked below is a video tutorial for making masks with simple materials that can be bought cheaply or found around the home.
+                </p>
+                <div style="text-align:center">
+                    <iframe width="560" height="315" src="https://www.youtube.com/embed/VgHrnS6n4iA" frameborder="0"
+                            allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                </div>
+            </div>
+            <div class="column">
+                <h2 style="text-align:center">Where to donate masks</h2>
+                <p>
+                    Find places can be tricky as the stock in masks rises around the country. Donations can still be useful for organizations or communities
+                    that might not be able to purchase masks. Places to donate in your local area can be found through some searches on google.
+                </p>
+                <p>Some links that might be useful: </p>
+                <a href="https://deaconess.com/How-to-make-a-Face-Mask/Mask-Donations?state=Michigan">Deaconess</a>
+            </div>
+        </div>
+    </main>
+
 </body>
 
 </html>

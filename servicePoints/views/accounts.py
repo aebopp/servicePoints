@@ -331,17 +331,35 @@ def incompleteForm(prev):
 
 @servicePoints.app.route('/accounts/mask/')
 def mask():
-    context = {}
+    username = flask.session["username"]
+    cursor = servicePoints.model.get_db()
+    studentOrgCur = cursor.execute('SELECT orgName, hours FROM users WHERE '
+                            'username =:who',
+                            {"who": username})
+    results = studentOrgCur.fetchone()
+    context = {'username': username, 'org': results["orgName"], 'hours': results["hours"]}
     return render_template('mask.html', **context)
 
 @servicePoints.app.route('/accounts/blood/')
 def blood():
-    context = {}
+    username = flask.session["username"]
+    cursor = servicePoints.model.get_db()
+    studentOrgCur = cursor.execute('SELECT orgName, hours FROM users WHERE '
+                            'username =:who',
+                            {"who": username})
+    results = studentOrgCur.fetchone()
+    context = {'username': username, 'org': results["orgName"], 'hours': results["hours"]}
     return render_template('blood.html', **context)
 
 @servicePoints.app.route('/accounts/food/')
 def food():
-    context = {}
+    username = flask.session["username"]
+    cursor = servicePoints.model.get_db()
+    studentOrgCur = cursor.execute('SELECT orgName, hours FROM users WHERE '
+                            'username =:who',
+                            {"who": username})
+    results = studentOrgCur.fetchone()
+    context = {'username': username, 'org': results["orgName"], 'hours': results["hours"]}
     return render_template('food.html', **context)
 
 @servicePoints.app.route('/accounts/profile/', methods=['GET', 'POST'])
@@ -451,18 +469,24 @@ def tutorsu():
 
             data = (flask.session['username'], flask.session['subjects'],
                     flask.session['time'])
-
+            data2 = (flask.session['subjects'], flask.session['time'],
+                    flask.session['username'])
 
             to_add = (name,)
             cursor.execute('SELECT * FROM tutors WHERE username=?', to_add)
             if cursor.fetchone() is not None:
                 cur = servicePoints.model.get_db()
-                cur.execute("UPDATE tutors SET username = ?, subject=?, time=?", data)
+                cur.execute("UPDATE tutors SET subject=?, time=? WHERE username = ?", data2)
+                registered = 1
             else:
                 cur = servicePoints.model.get_db()
                 cur.execute("INSERT INTO tutors(username, subject, time) VALUES (?, ?, ?)", data)
+                registered = 0
 
             return flask.redirect(flask.url_for('tutorsu'))
+        if 'delete' in flask.request.form:
+            cur = servicePoints.model.get_db()
+            cur.execute("DELETE from tutors WHERE username = ?", (flask.session['username'],))
 
     cursor = servicePoints.model.get_db().cursor()
     name = str(flask.session['username'])
@@ -480,8 +504,16 @@ def tutorsu():
     cur2 = cursor.execute('SELECT fullname, email FROM users WHERE username IN (SELECT username FROM tutors)')
     tutorsN = cur2.fetchall()
 
+    username = flask.session["username"]
+    cursor = servicePoints.model.get_db()
+    studentOrgCur = cursor.execute('SELECT orgName, hours FROM users WHERE '
+                            'username =:who',
+                            {"who": username})
+    results = studentOrgCur.fetchone()
+
     # Add database info to context
-    context = {"tutors": tutors, "tutorsN": tutorsN, "registered": registered}
+
+    context = {"tutors": tutors, "tutorsN": tutorsN, 'username': username, 'org': results["orgName"], 'hours': results["hours"], "registered": registered}
     return flask.render_template("tutor.html", **context,zip=zip)
 
 @servicePoints.app.route('/accounts/submitPoints/', methods=['GET', 'POST'])
