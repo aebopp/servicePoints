@@ -1,48 +1,126 @@
 <!DOCTYPE html>
 <html>
-<body>
+
+<head>
     <title>ServicePoints</title>
-    <p>
-        Want to register an organization with your new account account?
+
+    <style>
+
+        a {
+            text-decoration: none;
+        }
+
+            a:hover {
+                text-decoration: underline;
+            }
+
+        body {
+            padding: 70px 0;
+            font-family: Arial, Helvetica, sans-serif;
+            display: grid;
+            justify-items: center;
+            align-items: center;
+        }
+
+        input[type=submit]:hover {
+            opacity: 0.8;
+        }
+
+        .main-container {
+            width: 40%;
+            height: 100%;
+            display: grid;
+            justify-items: center;
+            align-items: center;
+            background-color: white;
+            border-radius: 7px;
+            border: 3px solid black;
+            padding: 10px 10px 10px 10px;
+        }
+
+        input[type=text], input[type=password] {
+            border: none;
+            border-bottom: 1px solid #3a3a3a;
+            margin-bottom: 15px;
+            margin-left: 5px;
+            border-radius: 3px;
+            outline: none;
+            padding: 0px 0px 5px 5px;
+            flex: 1;
+        }
+
+        #login-form-submit {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            font-weight: bold;
+            background-color: #3a3a3a;
+        }
+
+        #login-form {
+            width: 50%;
+        }
+
+        .register {
+            padding: 5px 0px 10px 0px;
+        }
+
+        .flex-container {
+            display: flex;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <main class="main-container">
+
+        <h1>Create a ServicePoints Account:</h1>
+
+        <form id="login-form" action="/accounts/create/" method="post" enctype="multipart/form-data">
+            <div class="flex-container">
+                <b>Your Name: </b>
+                <input type="text" placeholder="Enter Name" name="fullname" class="login-form-field" required />
+            </div>
+            <div class="flex-container">
+                <b>Username: </b>
+                <input type="text" placeholder="Enter Username" name="username" class="login-form-field" />
+            </div>
+            <div class="flex-container">
+                <b>Email: </b>
+                <input type="text" placeholder="Enter Email" name="email" class="login-form-field" />
+            </div>
+            <div class="flex-container">
+                <b>Password: </b>
+                <input type="password" placeholder="Enter Password" name="password" class="login-form-field" />
+            </div>
+            <div>
+                <b>Select an Organization:</b><br />
+                Once you select an organization to join, a request will be sent for approval.
+                Until approved, your organization will appear as 'None'.<br />
+                <div style="text-align: center; margin: auto; padding-bottom: 15px;">
+                    <select name="orgName" id="orgName">
+                        <option value="NONE">Choose Later</option>
+                        {% for org in orgs %}
+                        {% if org.orgName != 'NONE' %}
+                        <option value="{{org.orgName}}">{{org.orgName}}</option>
+                        {%endif%}
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <input type="submit" name="signup" value="sign up" id="login-form-submit" />
+        </form>
+        <p>
+            Have an account?
+            <a href="/accounts/login/">Log in</a>
+        </p>
+        Want to register an organization with your new account account?<br />
         <a href="/accounts/createOrg/">Register as organization leader</a>
-    </p>    
-<p>
-    Once you select an organization to join, a request will be sent for approval.
-    Until approved, your organization will appear as 'None.'
-</p>
-    <form action="/accounts/create/" method="post" enctype="multipart/form-data">
-        <p>
-            <label for="orgName">Select an Organization:</label>
-            <select name="orgName" id="orgName">
-                <option value="NONE">Choose Later</option>
-                {% for org in orgs %}
-                {% if org.orgName != 'NONE' %}
-                <option value="{{org.orgName}}">{{org.orgName}}</option>
-                {%endif%}
-                {% endfor %}
-            </select>
-        </p>
-        <p>
-            Your Name
-            <input type="text" name="fullname" />
-        </p>
-        <p>
-            Username
-            <input type="text" name="username" />
-        </p>
-        <p>
-            Email
-            <input type="text" name="email" />
-        </p>
-        <p>
-            Password
-            <input type="password" name="password" />
-        </p>
-        <input type="submit" name="signup" value="sign up" />
-    </form>
-    <p>
-        Have an account?
-        <a href="/accounts/login/">Log in</a>
-    </p>
+    </main>
+
 </body>
 </html>

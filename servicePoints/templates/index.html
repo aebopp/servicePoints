@@ -5,10 +5,11 @@
 
     <style>
         .dropbtn {
-            background-color: darkgray;
-            color: black;
-            padding: 8px;
-            font-size: 14px;
+            background-color: #333;
+            color: #f2f2f2;
+            padding: 12px;
+            margin-right: 20px;
+            font-size: 16px;
             border: none;
             cursor: pointer;
         }
@@ -16,7 +17,7 @@
         .dropdown {
             position: relative;
             display: inline-block;
-            float:right;
+            float: right;
         }
 
         .dropdown-content {
@@ -30,12 +31,12 @@
             z-index: 1;
         }
 
-        .dropdown-content a {
-            color: black;
-            padding: 12px 16px;
-            text-decoration: none;
-            display: block;
-        }
+            .dropdown-content a {
+                color: black;
+                padding: 12px 16px;
+                text-decoration: none;
+                display: block;
+            }
 
         .dropdown a:hover {
             background-color: #ddd;
@@ -44,54 +45,86 @@
         .show {
             display: block;
         }
+
+        .topnav {
+            background-color: #333;
+            position: fixed;
+            top: 0;
+            width: 100%;
+        }
+
+        .topnav button:hover {
+            background: rgba(0,0,0,0.2);
+        }
+
+        main {
+            margin-top: 75px;
+        }
+
+        .topitem {
+            color: #f2f2f2;
+            float: left;
+            display: block;
+            font-size: 16px;
+            padding: 14px 16px;
+        }
     </style>
 </head>
 <body>
-    Username: {{username}}
-    <div class="dropdown">
-        <button onclick="myFunction()" class="dropbtn">Settings</button>
+    <div class="topnav">
+        <div class="topitem">
+            Username: {{username}}
+        </div>
+        <div class="topitem">
+            Organization: {{org}}
+        </div>
+        <div class="topitem">
+            Hours: {{hours}}
+        </div>
+        <div class="dropdown">
+            <button onclick="myFunction()" class="dropbtn">Settings</button>
 
-        <div id="myDropdown" class="dropdown-content">
-            <a href="/accounts/profile/">Profile</a>
-            <hr />
-            {% if leader == 1 %}
-            <a href="/accounts/manageOrg/">Manage Org</a>
-            <hr />
-            {% endif %}
-            <a href="/accounts/logout/">Logout</a>
+            <div id="myDropdown" class="dropdown-content">
+                <a href="/accounts/profile/">Profile</a>
+                <hr />
+                {% if leader == 1 %}
+                <a href="/accounts/manageOrg/">Manage Org</a>
+                <hr />
+                {% endif %}
+                <a href="/accounts/logout/">Logout</a>
 
+            </div>
         </div>
     </div>
+    <main>
+        <h1 style="text-align:center">Welcome to ServicePoints!</h1>
+        <p>
+            <a href="/accounts/mask/">
+                <img src=/images/mask.png alt="mask">
+            </a>
+            <a href="/accounts/blood/">
+                <img src=/images/blood.png alt="blood">
+            </a>
+            <a href="/accounts/food/">
+                <img src=/images/food.png alt="food">
+            </a>
+            <a href="/accounts/tutorsu/">
+                <img src=/images/tutor.png alt="tutorsu">
+            </a>
+            <a href="/accounts/submitPoints/">
+                <img src=/images/submit.png alt="mask">
+            </a>
 
-    <h1 style="text-align:center">Welcome to ServicePoints!</h1>
-    <p>{{org}}</p>
-    <p>Hours: {{hours}}</p>
-    <p>
-        <a href="/accounts/mask/">
-            <img src=/images/mask.png alt="mask">
-        </a>
-        <a href="/accounts/blood/">
-            <img src=/images/blood.png alt="blood">
-        </a>
-        <a href="/accounts/food/">
-            <img src=/images/food.png alt="food">
-        </a>
-        <a href="/accounts/tutorsu/">
-            <img src=/images/tutor.png alt="tutorsu">
-        </a>
-        <a href="/accounts/submitPoints/">
-            <img src=/images/submit.png alt="mask">
-        </a>
-
-        {% if leader == 1 %}
-        <a href="/accounts/viewMemberPoints/">
-            <img src=/images/view.png alt="view">
-        </a>
-        <a href="/accounts/viewRequests/">
-            <img src=/images/requests.png alt="requests">
-        </a>
-        {% endif %}
-    </p>
+            {% if leader == 1 %}
+            <a href="/accounts/viewMemberPoints/">
+                <img src=/images/view.png alt="view">
+            </a>
+            <a href="/accounts/viewRequests/">
+                <img src=/images/requests.png alt="requests">
+            </a>
+            {% endif %}
+        </p>
+    </main>
 
     <script>
         /* When the user clicks on the button,
