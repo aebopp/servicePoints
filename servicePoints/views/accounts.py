@@ -63,6 +63,7 @@ def create():
     if flask.request.method == 'POST':
         cursor = servicePoints.model.get_db().cursor()
         name = str(flask.request.form['username'])
+        orgName = str(flask.request.form['orgName'])
         
         to_add = (name,)
         cursor.execute('SELECT * FROM users WHERE username=?', to_add)
@@ -70,12 +71,8 @@ def create():
         # If the chosen name is already taken
         if cursor.fetchone() is not None or name == "pending":
             msg = 'Username is already taken.'
-        else:
-            # If the user chose to not join an org
-            if orgName == "NONE":
-                orgData = (name, "NONE")
-                cur = servicePoints.model.get_db()
-                cur.execute("INSERT INTO orgs(username, orgName) VALUES (?, ?)", orgData)
+
+        if msg == '':
 
             flask.session['username'] = flask.request.form['username']
             flask.session['fullname'] = flask.request.form['fullname']
