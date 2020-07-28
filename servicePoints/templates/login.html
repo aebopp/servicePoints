@@ -71,23 +71,30 @@
     <h1>Welcome to ServicePoints!</h1>
 
     <main class="main-container">
-            <h1>Login:</h1>
+        <h1>Login:</h1>
 
-            <form id="login-form" action="/accounts/login/" method="post" enctype="multipart/form-data">
-                <div>
-                    <b>Username: </b>
-                    <input type="text" placeholder="Enter Username" class="login-form-field" name="username" required />
-                </div>
-                <div>
-                    <b>Password: </b>
-                    <input type="password" placeholder="Enter Password" class="login-form-field" name="password" required />
-                </div>
+        <form id="login-form" action="/accounts/login/" method="post" enctype="multipart/form-data">
+            <div>
+                <b>Username: </b>
+                <input type="text" placeholder="Enter Username" class="login-form-field" name="username" required />
+            </div>
+            <div>
+                <b>Password: </b>
+                <input type="password" placeholder="Enter Password" class="login-form-field" name="password" required />
+            </div>
+            {% if msg != '' %}
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                <strong>{{ msg }}</strong>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            {% endif %}
+            <input type="submit" value="Login" id="login-form-submit" />
+        </form>
 
-                <input type="submit" value="Login" id="login-form-submit" />
-            </form>
-
-            <a class="register" href="/accounts/create/">Create a member account</a>
-            <a class="register" href="/accounts/createOrg/">Create an organization</a>
+        <a class="register" href="/accounts/create/">Create a member account</a>
+        <a class="register" href="/accounts/createOrg/">Create an organization</a>
 
     </main>
 

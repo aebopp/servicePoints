@@ -14,6 +14,8 @@ servicePoints.app.secret_key = b'''\xf4\xb2\x9f\x80\xb1\xef\x01\xc6\x10\xca
 @servicePoints.app.route('/accounts/login/', methods=['GET', 'POST'])
 def login():
     """Render login page."""
+    context = {}
+    msg = ''
     if 'username' in flask.session:
         return flask.redirect(flask.url_for('index'))
     if flask.request.method == 'POST':
@@ -24,22 +26,24 @@ def login():
                                     {"who": flask.request.form['username']})
         password_3 = password_1.fetchall()
         if not password_3:
-            return flask.redirect(flask.url_for('accountNotFound'))
-        password_2 = password_3[0]['password']
-        password_4 = password_2.split('$')
-        algorithm = password_4[0]
-        salt = password_4[1]
-        p2word = password_4[2]
-        hash_obj = hashlib.new(algorithm)
-        password_salted = salt + pass_user
-        hash_obj.update(password_salted.encode('utf-8'))
-        password_hash = hash_obj.hexdigest()
-        if p2word != password_hash:
-            return flask.redirect(flask.url_for('accountNotFound'))
-        flask.session['username'] = flask.request.form['username']
-        return flask.redirect(flask.url_for('index'))
-    context = {}
-    return render_template('login.html', **context)
+            msg = 'Incorrect login credentials'
+        else:
+            password_2 = password_3[0]['password']
+            password_4 = password_2.split('$')
+            algorithm = password_4[0]
+            salt = password_4[1]
+            p2word = password_4[2]
+            hash_obj = hashlib.new(algorithm)
+            password_salted = salt + pass_user
+            hash_obj.update(password_salted.encode('utf-8'))
+            password_hash = hash_obj.hexdigest()
+            # if the password does not exist
+            if p2word != password_hash:
+                msg = 'Incorrect login credentials'
+            else:
+                flask.session['username'] = flask.request.form['username']
+                return flask.redirect(flask.url_for('index'))
+    return render_template('login.html', **context, msg=msg)
 
 @servicePoints.app.route('/accounts/logout/')
 def logout():
@@ -51,67 +55,60 @@ def logout():
 @servicePoints.app.route('/accounts/create/', methods=['GET', 'POST'])
 def create():
     """Render create page."""
+
+    msg = ''
     # If a user is already logged in, redirect to /accounts/edit/
     if 'username' in flask.session:
         return flask.redirect(flask.url_for('index'))
     if flask.request.method == 'POST':
         cursor = servicePoints.model.get_db().cursor()
         name = str(flask.request.form['username'])
-        orgName = str(flask.request.form['orgName'])
-        password = str(flask.request.form['password'])
         
         to_add = (name,)
-        to_join = (orgName,)
         cursor.execute('SELECT * FROM users WHERE username=?', to_add)
+
+        # If the chosen name is already taken
         if cursor.fetchone() is not None or name == "pending":
-            return flask.redirect(flask.url_for('duplicateUsername', prev='create'))
-
-
-        if len(str(flask.request.form['password'])) is 0 or len(str(flask.request.form['fullname'])) is 0:
-            return flask.redirect(flask.url_for('incompleteForm', prev="create")) 
-
-        if len(str(flask.request.form['username'])) is 0 or len(str(flask.request.form['email'])) is 0:
-            return flask.redirect(flask.url_for('incompleteForm', prev="create")) 
-
-        cursor.execute('SELECT * FROM orgs WHERE orgName=?', to_join)
-        if cursor.fetchone() is None:
+            msg = 'Username is already taken.'
+        else:
+            # If the user chose to not join an org
             if orgName == "NONE":
                 orgData = (name, "NONE")
                 cur = servicePoints.model.get_db()
                 cur.execute("INSERT INTO orgs(username, orgName) VALUES (?, ?)", orgData)
-            else:
-                return flask.redirect(flask.url_for('orgNotFound'))
 
-        flask.session['username'] = flask.request.form['username']
-        flask.session['fullname'] = flask.request.form['fullname']
-        flask.session['orgName'] = flask.request.form['orgName']
-        flask.session['email'] = flask.request.form['email']
-        flask.session['password'] = flask.request.form['password']
+            flask.session['username'] = flask.request.form['username']
+            flask.session['fullname'] = flask.request.form['fullname']
+            flask.session['orgName'] = flask.request.form['orgName']
+            flask.session['email'] = flask.request.form['email']
+            flask.session['password'] = flask.request.form['password']
 
-        pw = hash_pass(flask.session['password'])
-        data = (flask.session['username'], flask.session['fullname'],
-                flask.session['email'], 'NONE',
-                pw, 0)
-        pendingData = (flask.session['username'], flask.session['fullname'],
-                flask.session['email'], flask.session['orgName'], 0)
-        cur = servicePoints.model.get_db()
-        cur.execute("INSERT INTO users(username, fullname, email, orgName, "
-                    "password, hours) VALUES (?, ?, ?, ?, ?, ?)", data)
-        cur.execute("INSERT INTO pendingOrgs(username, fullname, email, orgName, "
-                    "hours) VALUES (?, ?, ?, ?, ?)", pendingData)
+            pw = hash_pass(flask.session['password'])
+            data = (flask.session['username'], flask.session['fullname'],
+                    flask.session['email'], 'NONE',
+                    pw, 0)
+            pendingData = (flask.session['username'], flask.session['fullname'],
+                    flask.session['email'], flask.session['orgName'], 0)
+            cur = servicePoints.model.get_db()
+            cur.execute("INSERT INTO users(username, fullname, email, orgName, "
+                        "password, hours) VALUES (?, ?, ?, ?, ?, ?)", data)
+            cur.execute("INSERT INTO pendingOrgs(username, fullname, email, orgName, "
+                        "hours) VALUES (?, ?, ?, ?, ?)", pendingData)
 
-        return flask.redirect(flask.url_for('index'))
+            return flask.redirect(flask.url_for('index'))
 
     cursor = servicePoints.model.get_db()
 
     cur = cursor.execute("SELECT * FROM orgs")
     orgs = cur.fetchall()
     context = {"orgs": orgs}
-    return render_template('create.html', **context)
+    return render_template('create.html', **context, msg=msg)
 
 @servicePoints.app.route('/accounts/createOrg/', methods=['GET', 'POST'])
 def createOrg():
     """Render createOrg page."""
+
+    msg = ''
     # If a user is already logged in, redirect to /accounts/edit/
     if 'username' in flask.session:
         return flask.redirect(flask.url_for('index'))
@@ -125,49 +122,35 @@ def createOrg():
 
         to_add = (name,)
         to_addOrg = (orgName,)
-        if orgName == "NONE":
-            return flask.redirect(flask.url_for('duplicateOrgName', prev='createOrg'))
-        if name == "pending":
-            return flask.redirect(flask.url_for('duplicateUsername', prev='createOrg'))
+
         cursor.execute('SELECT * FROM users WHERE username=?', to_add)
-        if cursor.fetchone() is not None:
-            return flask.redirect(flask.url_for('duplicateUsername', prev='createOrg'))
+        if cursor.fetchone() is not None or name == "pending":
+            msg = 'Username is already taken.'
 
         cursor.execute('SELECT * FROM orgs WHERE orgName=?', to_addOrg)
-        if cursor.fetchone() is not None:
-            return flask.redirect(flask.url_for('duplicateOrgName', prev='createOrg'))
+        if cursor.fetchone() is not None or orgName == "NONE":
+            msg = 'Organization name is already taken.'
+        if msg == '':
+            flask.session['username'] = flask.request.form['username']
+            flask.session['fullname'] = flask.request.form['fullname']
+            flask.session['orgName'] = flask.request.form['orgName']
+            flask.session['email'] = flask.request.form['email']
+            flask.session['password'] = flask.request.form['password']
 
-        # If a user tries to create an account with an empty string as the
-        # password, abort(400)
-        if len(str(flask.request.form['password'])) is 0 or len(str(flask.request.form['fullname'])) is 0:
-            return flask.redirect(flask.url_for('incompleteForm', prev="createOrg")) 
+            pw = hash_pass(flask.session['password'])
+            data = (flask.session['username'], flask.session['fullname'],
+                    flask.session['email'], flask.session['orgName'],
+                    pw, 0)
+            orgData = (flask.session['username'], flask.session['orgName'])
+            cur = servicePoints.model.get_db()
+            cur.execute("INSERT INTO orgs(username, orgName) VALUES (?, ?)", orgData)
+            cur.execute("INSERT INTO users(username, fullname, email, orgName, "
+                        "password, hours) VALUES (?, ?, ?, ?, ?, ?)", data)
 
-        if len(str(flask.request.form['orgName'])) is 0 or len(str(flask.request.form['email'])) is 0:
-            return flask.redirect(flask.url_for('incompleteForm', prev="createOrg")) 
-        
-        if len(str(flask.request.form['username'])) is 0:
-            return flask.redirect(flask.url_for('incompleteForm', prev="createOrg"))
-
-        flask.session['username'] = flask.request.form['username']
-        flask.session['fullname'] = flask.request.form['fullname']
-        flask.session['orgName'] = flask.request.form['orgName']
-        flask.session['email'] = flask.request.form['email']
-        flask.session['password'] = flask.request.form['password']
-
-        pw = hash_pass(flask.session['password'])
-        data = (flask.session['username'], flask.session['fullname'],
-                flask.session['email'], flask.session['orgName'],
-                pw, 0)
-        orgData = (flask.session['username'], flask.session['orgName'])
-        cur = servicePoints.model.get_db()
-        cur.execute("INSERT INTO orgs(username, orgName) VALUES (?, ?)", orgData)
-        cur.execute("INSERT INTO users(username, fullname, email, orgName, "
-                    "password, hours) VALUES (?, ?, ?, ?, ?, ?)", data)
-
-        return flask.redirect(flask.url_for('index'))
+            return flask.redirect(flask.url_for('index'))
 
     context = {}
-    return render_template('createOrg.html', **context)
+    return render_template('createOrg.html', **context, msg=msg)
 
 @servicePoints.app.route('/accounts/viewMemberPoints/', methods=['GET'])
 def viewMemberPoints():
@@ -195,8 +178,7 @@ def viewRequests():
                 file = flask.request.form["filename"]
                 servicePoints.model.get_db().execute('DELETE FROM requests WHERE postid =:one ', 
                 {"one": post})
-                os.remove(os.path.join(
-                servicePoints.app.config["IMAGES_FOLDER"], file))
+                os.remove(os.path.join(servicePoints.app.config["IMAGES_FOLDER"], file))
             if 'confirm' in flask.request.form:
                 try:
                     numHours = int(flask.request.form["numHours"])
@@ -213,8 +195,7 @@ def viewRequests():
                 {"one": dbHours["hours"], "two": user})
                 servicePoints.model.get_db().execute('DELETE FROM requests WHERE postid =:one ', 
                 {"one": post})
-                os.remove(os.path.join(
-                servicePoints.app.config["IMAGES_FOLDER"], file))
+                os.remove(os.path.join(servicePoints.app.config["IMAGES_FOLDER"], file))
 
         username = flask.session["username"]
         cursor = servicePoints.model.get_db()
@@ -370,10 +351,10 @@ def profile():
             orgName = str(flask.request.form['orgName'])
             username = str(flask.session['username'])
             cur = servicePoints.model.get_db()
-            curOrg =          cur.execute('SELECT orgName FROM users WHERE username = ?',
+            curOrg = cur.execute('SELECT orgName FROM users WHERE username = ?',
                                         (username,))
             org = curOrg.fetchone()
-            curOrg =          cur.execute('SELECT fullname, email, hours FROM users WHERE username = ?',
+            curOrg = cur.execute('SELECT fullname, email, hours FROM users WHERE username = ?',
                                         (username,))  
             userInfo = curOrg.fetchone()          
             pendingData = (flask.session['username'], userInfo['fullname'],
@@ -447,8 +428,7 @@ def profile():
 @servicePoints.app.route('/images/<path:filename>', methods=['GET', 'POST'])
 def images(filename):
     if "username" in flask.session:
-        return flask.send_from_directory(
-            servicePoints.app.config['IMAGES_FOLDER'], filename, as_attachment=True)
+        return flask.send_from_directory(servicePoints.app.config['IMAGES_FOLDER'], filename, as_attachment=True)
     return flask.redirect(flask.url_for('login'))
 
 @servicePoints.app.route('/accounts/tutorsu/', methods=['GET', 'POST'])
@@ -528,10 +508,8 @@ def submitPoints():
         hash_txt = sha256sum(temp_filename)
         dummy, suffix = os.path.splitext(file.filename)
         hash_filename_basename = hash_txt + suffix
-        hash_filename = os.path.join(
-            servicePoints.app.config["IMAGES_FOLDER"],
-            hash_filename_basename
-        )
+        hash_filename = os.path.join(servicePoints.app.config["IMAGES_FOLDER"],
+            hash_filename_basename)
 
         # Move temp file to permanent location
         shutil.move(temp_filename, hash_filename)
