@@ -1,38 +1,100 @@
 <!DOCTYPE html>
 <html>
-<body>
-<title>ServicePoints</title>
-<p>
-  Don't want to register a new student organization?
-<a href="/accounts/create/">Register as organization member</a>
-</p>
 
-  <form action="/accounts/createOrg/" method="post" enctype="multipart/form-data">
-    <p>
-        New Student Organization Name
-      <input type="text" name="orgName"/>
-      </p>
-    <p>
-      Your Name
-    <input type="text" name="fullname"/>
-    </p>
-    <p>
-      Username
-    <input type="text" name="username"/>
-    </p>
-    <p>
-      Email
-    <input type="text" name="email"/>
-    </p>
-    <p>
-      Password
-    <input type="password" name="password"/>
-    </p>
-    <input type="submit" name="signup" value="sign up"/>
-  </form>
-  <p>
-    Have an account?
-  <a href="/accounts/login/">Log in</a>
-  </p>
+
+<head>
+    <title>ServicePoints</title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+
+    <style>
+
+        a {
+            text-decoration: none;
+        }
+
+            a:hover {
+                text-decoration: underline;
+            }
+
+        body {
+            padding: 70px 0;
+            font-family: Arial, Helvetica, sans-serif;
+            display: grid;
+            text-align: center;
+        }
+
+        input[type=submit]:hover {
+            opacity: 0.8;
+        }
+
+        .main-container {
+            border-radius: 7px;
+            border: 3px solid black;
+            padding: 25px;
+            margin-top: 10px;
+            text-align:left;
+        }
+
+        input[type=text], input[type=password], input[type=email] {
+            border: none;
+            border-bottom: 1px solid #3a3a3a;
+            margin-bottom: 15px;
+            border-radius: 3px;
+            outline: none;
+            padding: 0px 0px 5px 5px;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <h1>Create a ServicePoints Organization and Admin Account:</h1>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-4 col-sm-4 col-xs-12"></div>
+            <div class="col-md-4 col-sm-4 col-xs-12 main-container">
+                <form action="/accounts/createOrg/" method="post" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <b>New Student Organization Name: </b>
+                        <input type="text" placeholder="Enter Org Name" name="orgName" class="form-control" required />
+                    </div>
+                    <div class="form-group">
+                        <b>Your Name: </b>
+                        <input type="text" placeholder="Enter Your Name" name="fullname" class="form-control" required />
+                    </div>
+                    <div class="form-group">
+                        <b>Username: </b>
+                        <input type="text" placeholder="Enter Username" name="username" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <b>Email: </b>
+                        <input type="text" placeholder="Enter Email" name="email" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <b>Password: </b>
+                        <input type="password" placeholder="Enter Password" name="password" class="form-control" />
+                    </div>
+                    <input type="submit" class="btn btn-block btn-primary" name="signup" value="sign up" />
+                </form>
+                <div style="text-align:center;">
+                    <p>Have an account? <a href="/accounts/login/">Log in</a></p>
+                    Don't want to register a new student organization?<br />
+                    <a href="/accounts/create/">Register as organization member</a>
+                </div>
+            </div>
+            <div class="col-md-4 col-sm-4 col-xs-12"></div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
+
 </body>
 </html>

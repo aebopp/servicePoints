@@ -4,6 +4,11 @@
     <link rel="stylesheet" type="text/css" href="/css/style.css">
     <title>servicePoints</title>
 
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+
     <style>
 
         a {
@@ -27,12 +32,12 @@
         }
 
         .main-container {
-            width: 30%;
             height: 100%;
             display: grid;
             justify-items: center;
             align-items: center;
             background-color: white;
+            padding: 10px 50px;
             border-radius: 7px;
             border: 3px solid black;
         }
@@ -66,26 +71,29 @@
     <h1>Welcome to ServicePoints!</h1>
 
     <main class="main-container">
-        <h1>Login:</h1>
+            <h1>Login:</h1>
 
-        <form id="login-form" action="/accounts/login/" method="post" enctype="multipart/form-data">
-            <div>
-                <b>Username: </b>
-                <input type="text" placeholder="Enter Username" class="login-form-field" name="username" required />
-            </div>
-            <div>
-                <b>Password: </b>
-                <input type="password" placeholder="Enter Password" class="login-form-field" name="password" required />
-            </div>
+            <form id="login-form" action="/accounts/login/" method="post" enctype="multipart/form-data">
+                <div>
+                    <b>Username: </b>
+                    <input type="text" placeholder="Enter Username" class="login-form-field" name="username" required />
+                </div>
+                <div>
+                    <b>Password: </b>
+                    <input type="password" placeholder="Enter Password" class="login-form-field" name="password" required />
+                </div>
 
-            <input type="submit" value="Login" id="login-form-submit" />
-        </form>
+                <input type="submit" value="Login" id="login-form-submit" />
+            </form>
 
-        <a class="register" href="/accounts/create/">Create a member account</a>
-        <a class="register" href="/accounts/createOrg/">Create an organization</a>
+            <a class="register" href="/accounts/create/">Create a member account</a>
+            <a class="register" href="/accounts/createOrg/">Create an organization</a>
 
     </main>
 
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
 
 </body>
 </html>
