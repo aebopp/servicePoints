@@ -253,41 +253,6 @@ def delete():
     context = {'username': flask.session['username']}
     return render_template('delete.html', **context)
 
-@servicePoints.app.route('/accounts/orgNotFound/', methods=['GET', 'POST'])
-def orgNotFound():
-    """Render delete page."""
-    if flask.request.method == 'POST':
-        if 'login' in flask.request.form:
-            return flask.redirect(flask.url_for('login'))
-        if 'registerOrg' in flask.request.form:
-            return flask.redirect(flask.url_for('createOrg'))
-    context = {}
-    return render_template('orgNotFound.html', **context)
-
-@servicePoints.app.route('/accounts/accountNotFound/', methods=['GET', 'POST'])
-def accountNotFound():
-    if flask.request.method == 'POST':
-        if 'login' in flask.request.form:
-            return flask.redirect(flask.url_for('login'))
-        if 'createAccount' in flask.request.form:
-            return flask.redirect(flask.url_for('create'))
-    context = {}
-    return render_template('accountNotFound.html', **context)
-
-@servicePoints.app.route('/accounts/duplicateUsername/<prev>', methods=['GET', 'POST'])
-def duplicateUsername(prev):
-    if flask.request.method == 'POST':
-        return flask.redirect(flask.url_for(prev))
-    context = {"prev": prev}
-    return render_template('duplicateUsername.html', **context)
-
-@servicePoints.app.route('/accounts/duplicateOrgName/', methods=['GET', 'POST'])
-def duplicateOrgName():
-    if flask.request.method == 'POST':
-        return flask.redirect(flask.url_for('createOrg'))
-    context = {}
-    return render_template('duplicateOrgName.html', **context)
-
 @servicePoints.app.route('/accounts/hourError/', methods=['GET', 'POST'])
 def hourError():
     if flask.request.method == 'POST':
