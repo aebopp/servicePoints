@@ -60,15 +60,15 @@
         <div class="row">
             <div class="col-sm-8">
                 <h2>Profile</h2>
-                {% if pending == 0 %}
-                <p>
-                    Student Organization: {{org}}
-                </p>
-                {%endif%}
-                {% if pending == 1 %}
-                <p>
-                    Student Organization: Your request is pending. Requesting to join another organization while your request is pending will cancel your original request.
-                </p>
+                {% if pending != '' %}
+                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    <strong>
+                        Your request to join {{pending}} is pending. Requesting to join another organization while your request is pending will cancel your original request.
+                    </strong>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
                 {%endif%}
 
                 {% if leader == 0 %}

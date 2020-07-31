@@ -196,11 +196,11 @@ def viewRequests():
 
         username = flask.session["username"]
         cursor = servicePoints.model.get_db()
-        leaderCur = cursor.execute('SELECT postid, member, service, filename FROM requests WHERE '
+        leaderCur = cursor.execute('SELECT postid, member, service, description, filename FROM requests WHERE '
                     'leader =:who',
                     {"who": username})
         results = leaderCur.fetchall()
-        context = {'requests': results}
+        context = {'requests': results,'username': username, 'org': flask.session["orgName"], 'hours': flask.session["hours"]}
         return render_template('viewRequests.html', **context)
     return flask.redirect(flask.url_for('login'))
 
@@ -242,10 +242,20 @@ def hash_pass(password_in):
 
 @servicePoints.app.route('/accounts/delete/', methods=['GET', 'POST'])
 def delete():
-    """Render delete page."""
+    # Delete Account
     name = (flask.session['username'])
     to_add = (name,)
     cur = servicePoints.model.get_db()
+
+    #if flask.session["leader"] == 1:
+    #    leaderCur = cursor.execute('SELECT orgName FROM orgs WHERE '
+    #    'username =:who',d
+    #    {"who": username})
+    #    results = leaderCur.fetchone()
+    #    orgName = results["orgName"]
+    #    cursor.execute("DELETE from orgs WHERE orgName = ?", (orgName,))
+    #    cursor.execute("UPDATE users SET orgName = 'NONE' WHERE orgName = ?", (orgName,))
+    #    cursor.execute("UPDATE requests SET leader = 'pending' WHERE leader = ?", (username,))
 
     flask.session.clear()
     cur.execute('DELETE FROM users WHERE username=?', to_add)
@@ -253,7 +263,7 @@ def delete():
 
 @servicePoints.app.route('/accounts/deleteOrg/', methods=['GET', 'POST'])
 def deleteOrg():
-    """Render delete page."""
+    # Delete Organization
     username = flask.session["username"]
     cursor = servicePoints.model.get_db()
     leaderCur = cursor.execute('SELECT orgName FROM orgs WHERE '
@@ -411,11 +421,11 @@ def profile():
         leader = 1
 
     cur = cursor.execute('SELECT * FROM pendingOrgs WHERE username =:who', {"who": username})
-    tryfetch = cur.fetchone()
-    if tryfetch is None:
-        pending = 0
+    trypending = cur.fetchone()
+    if trypending is None:
+        pending = ''
     else:
-        pending = 1
+        pending = trypending["orgName"]
 
     context = {"orgs": orgs, "fullname": user["fullname"], "email": user["email"], "username": username, "hours": results["hours"],
         "org": user["orgName"], "leader": leader, "pending": pending}
@@ -498,6 +508,7 @@ def submitPoints():
         dummy, temp_filename = tempfile.mkstemp()
         file = flask.request.files["file"]
         serviceType = flask.request.form["service"]
+        description = flask.request.form["description"]
         file.save(temp_filename)
 
         # Compute filename
@@ -524,8 +535,8 @@ def submitPoints():
                             {"who": orgName})
             results = studentOrgLeader.fetchone()
             leader = results["username"]
-        cursor.execute('INSERT INTO requests(member, leader, service, filename) VALUES '
-            '(:one,:two,:three,:four)', {"one": username, "two": leader, "three": serviceType, "four": hash_filename_basename})
+        cursor.execute('INSERT INTO requests(member, leader, service, description, filename) VALUES '
+            '(:one,:two,:three,:four,:five)', {"one": username, "two": leader, "three": serviceType, "four": description, "five": hash_filename_basename})
 
         context = {'username': flask.session["username"], 'org': flask.session['orgName'], 'hours': flask.session["hours"], 
                    'leader': flask.session["leader"], 'serviceMsg' :'', 'submitMsg':'Your Service has been submitted'}
@@ -614,7 +625,7 @@ def manageOrg():
                     'orgName =:who',
                     {"who": orgName})
         pending = pendingCur.fetchall()
-        context = {'org': orgName, 'members': members, 'username': username, 'pending': pending}
+        context = {'org': orgName, 'members': members, 'username': username, 'pending': pending, 'hours': flask.session["hours"]}
         return render_template('manageOrg.html', **context)
     return flask.redirect(flask.url_for('login'))
 

@@ -41,6 +41,7 @@ CREATE TABLE requests(
 	  member VARCHAR(20) NOT NULL,
 	  leader VARCHAR(40) NOT NULL,
 	  service VARCHAR(40) NOT NULL,
+	  description VARCHAR(128) NOT NULL,
 	  filename VARCHAR(64) NOT NULL,
 	  PRIMARY KEY(postid)
 	  FOREIGN KEY(member) REFERENCES users(username) ON UPDATE CASCADE

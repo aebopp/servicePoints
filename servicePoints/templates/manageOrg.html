@@ -7,6 +7,23 @@
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    <style>
+        .listing {
+            padding: 14px 16px;
+            margin: 10px 0px;
+            border-radius: 7px;
+            border: 3px solid black;
+            width:100%;
+        }
+
+        .members {
+            padding: 20px 16px;
+            margin: 10px 0px 50px 0px;
+            border-radius: 7px;
+            border: 3px solid black;
+            float:left;
+        }
+    </style>
 
     <title>Manage Org</title>
 </head>
@@ -62,43 +79,44 @@
                 <h4>Pending Member Requests:</h4>
 
                 {% for member in pending %}
-                <form action="/accounts/manageOrg/" method="post" enctype="multipart/form-data">
-                    Name: {{member.fullname}}
-                    <br>Username: {{member.username}}
-                    <br>Email: {{member.email}}
-                    <br>Pre-Existing Hours: {{member.hours}}
-                    <input type="hidden" name="user" value="{{member.username}}" />
-                    <input type="submit" name="add" value="Add Member" />
-                    <input type="submit" name="deny" value="Deny Member" />
-                </form>
+                <div class="listing">
+                    <form action="/accounts/manageOrg/" method="post" enctype="multipart/form-data">
+                        Name: {{member.fullname}}
+                        <br>Username: {{member.username}}
+                        <br>Email: {{member.email}}
+                        <br>Pre-Existing Hours: {{member.hours}}
+                        <input type="hidden" name="user" value="{{member.username}}" />
+                        <input type="submit" name="add" value="Add Member" />
+                        <input type="submit" name="deny" value="Deny Member" />
+                    </form>
+                </div>
                 {% endfor %}
                 {% if not pending %}
                 No pending memberships
                 {% endif %}
 
                 <h4 style="margin-top:25px;">Current Members:</h4>
-
-                {% for member in members %}
-                {% if username == member.username %}
-                {{member.fullname}} ({{member.username}})
-                {% else %}
-
-                <form action="/accounts/manageOrg/" method="post" enctype="multipart/form-data">
+                <div class="members">
+                    {% for member in members %}
+                    {% if username == member.username %}
                     {{member.fullname}} ({{member.username}})
-                    <input type="hidden" name="user" value="{{member.username}}" />
-                    <input type="submit" name="remove" value="remove from org" />
-                </form>
-                {% endif %}
-                {% endfor %}
+                    {% else %}
+
+                    <form action="/accounts/manageOrg/" method="post" enctype="multipart/form-data">
+                        {{member.fullname}} ({{member.username}})
+                        <input type="hidden" name="user" value="{{member.username}}" />
+                        <input type="submit" name="remove" value="remove from org" />
+                    </form>
+                    {% endif %}
+                    {% endfor %}
+                </div>
 
             </div>
             <div class="col-sm-4">
                 <div>
                     <h2>Your Info: </h2>
-                    <p>Full Name: {{fullname}}</p>
                     <p>Username: {{username}}</p>
                     <p>Organization: {{org}}</p>
-                    <p>Email: {{email}}</p>
                     <p>Hours: {{hours}}</p>
                     <hr class="d-sm-none">
                 </div>
