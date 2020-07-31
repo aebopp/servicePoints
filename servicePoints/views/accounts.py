@@ -294,7 +294,15 @@ def blood():
                             'username =:who',
                             {"who": username})
     results = studentOrgCur.fetchone()
-    context = {'username': username, 'org': results["orgName"], 'hours': results["hours"]}
+
+    bloodDrives = cursor.execute('SELECT name, description, link FROM posts WHERE '
+                            'service =:who',
+                            {"who": 'blood'})
+    bloodDs = bloodDrives.fetchall()
+
+    # Add database info to context
+    context = {'username': username, 'org': results["orgName"], 'hours': results["hours"], 'bloodDs': bloodDs}
+
     return render_template('blood.html', **context)
 
 @servicePoints.app.route('/accounts/food/')
@@ -305,7 +313,14 @@ def food():
                             'username =:who',
                             {"who": username})
     results = studentOrgCur.fetchone()
-    context = {'username': username, 'org': results["orgName"], 'hours': results["hours"]}
+
+    foodDrives = cursor.execute('SELECT name, description, link FROM posts WHERE '
+                            'service =:who',
+                            {"who": 'food'})
+    foodDs = foodDrives.fetchall()
+
+    # Add database info to context
+    context = {'username': username, 'org': results["orgName"], 'hours': results["hours"], 'foodDs': foodDs}
     return render_template('food.html', **context)
 
 @servicePoints.app.route('/accounts/profile/', methods=['GET', 'POST'])
@@ -507,12 +522,13 @@ def submitService():
     if flask.request.method == 'POST':
         serviceType = flask.request.form["service"]
         description = flask.request.form["description"]
+        name = flask.request.form["name"] 
         link = flask.request.form["link"]
 
-        data = (serviceType, description, link)
+        data = (serviceType, name, description, link)
 
         cursor = servicePoints.model.get_db()
-        cursor.execute("INSERT INTO posts(service, description, link) VALUES (?, ?, ?)", data)
+        cursor.execute("INSERT INTO posts(service, name, description, link) VALUES (?, ?, ?, ?)", data)
 
         context = {'username': flask.session["username"], 'org': flask.session['orgName'], 'hours': flask.session["hours"], 
                    'leader': flask.session["leader"], 'serviceMsg' :'Your post has been submitted', 'submitMsg':''}

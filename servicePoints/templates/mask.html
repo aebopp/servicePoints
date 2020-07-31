@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
     <!-- Required meta tags -->
@@ -9,6 +9,15 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
 
     <title>How to make a mask:</title>
+
+    <style>
+        .about {
+            padding: 14px 16px;
+            background-color: lightgray;
+            margin: 10px;
+            border-radius: 7px;
+        }
+    </style>
 </head>
 <body>
     <div class="jumbotron text-center" style="margin-bottom:0; ">
@@ -77,98 +86,21 @@
                 <a style="font-size: 18px;" href="https://deaconess.com/How-to-make-a-Face-Mask/Mask-Donations?state=Michigan">Deaconess</a>
             </div>
             <div class="col-sm-4">
-                <p>
-                    <a href="" class="btn btn-default btn-lg btn-block" data-toggle="modal" data-target="#pointsModal" style="background-color:#03DAC6;">Submit Points</a>
-                </p>
-                <p>
-                    <a class="btn btn-default btn-lg btn-block" href="" data-toggle="modal" data-target="#serviceModal" style="background-color:#03DAC6;">Submit a Service Opportunity</a>
-                </p>
-                <h2>Your Info: </h2>
-                <p>Username: {{username}}</p>
-                <p>Organization: {{org}}</p>
-                <p>Hours: {{hours}}</p>
-                <hr class="d-sm-none">
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="pointsModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="myModalLabel">Submit Points</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                <div class="about">
+                    <h2>About</h2>
+                    <p>Masks...</p>
                 </div>
-                <div class="modal-body">
-                    <form action="/accounts/submitPoints/" method="post" enctype="multipart/form-data">
-                        <div class="form-group">
-                            <label for="service">Select the type of service:</label>
-
-                            <select name="service" id="service" class="form-control">
-                                <option value="mask">Mask-Making</option>
-                                <option value="blood">Donating Blood</option>
-                                <option value="tutor">Tutoring</option>
-                                <option value="food">Donating Food</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="description">Enter a brief description of the service:</label>
-                            <textarea class="form-control" name="description" rows="3" placeholder="Enter a Description"></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="file">Photo for proof of service</label>
-                            <input type="file" name="file" class="form-control-file">
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                            <input type="submit" class="btn btn-primary" name="update" value="Submit" />
-                        </div>
-                    </form>
+                <div>
+                    <h2>Your Info: </h2>
+                    <p>Username: {{username}}</p>
+                    <p>Organization: {{org}}</p>
+                    <p>Hours: {{hours}}</p>
+                    <hr class="d-sm-none">
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="modal fade" id="serviceModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="myModalLabel">Submit a Service Opportunity</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form action="/accounts/" method="post" enctype="multipart/form-data">
-                        <div class="form-group">
-                            <label for="service">Select the type of service:</label>
-
-                            <select name="service" id="service" class="form-control">
-                                <option value="mask">Mask-Making</option>
-                                <option value="blood">Donating Blood</option>
-                                <option value="tutor">Tutoring</option>
-                                <option value="food">Donating Food</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="description">Enter a brief description of the service:</label>
-                            <textarea class="form-control" name="description" rows="3" placeholder="Enter a Description"></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="file">Enter a link to the service</label>
-                            <input type="url" name="link" class="form-control">
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                            <input type="submit" class="btn btn-primary" name="update" value="Submit" />
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
     <div class="jumbotron text-center" style="margin-bottom:0; ">
     </div>
     <!-- Optional JavaScript -->

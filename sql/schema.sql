@@ -51,6 +51,7 @@ CREATE TABLE requests(
 CREATE TABLE posts(
 	  postid INTEGER NOT NULL,
 	  service VARCHAR(40) NOT NULL,
+	  name VARCHAR(30) NOT NULL,
 	  description VARCHAR(128) NOT NULL,
 	  link VARCHAR(128) NOT NULL,
 	  PRIMARY KEY(postid)

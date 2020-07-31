@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 
 <head>
@@ -61,11 +61,11 @@
                     <form action="/accounts/create/" method="post" enctype="multipart/form-data">
                         <div class="form-group">
                             <b>Your Name: </b>
-                            <input type="text" placeholder="Enter Name" name="fullname" class="form-control" required />
+                            <input type="text" placeholder="Enter Name" name="fullname" class="form-control" required maxlength="30" />
                         </div>
                         <div class="form-group">
                             <b>Username: </b>
-                            <input type="text" placeholder="Enter Username" name="username" class="form-control" required />
+                            <input type="text" placeholder="Enter Username" name="username" class="form-control" required maxlength="20" />
                         </div>
                         <div class="form-group">
                             <b>Email: </b>
@@ -73,7 +73,7 @@
                         </div>
                         <div class="form-group">
                             <b>Password: </b>
-                            <input type="password" placeholder="Enter Password" name="password" class="form-control" required />
+                            <input type="password" placeholder="Enter Password" name="password" class="form-control" required maxlength="20" />
                         </div>
                         <div>
                             <b>Select an Organization:</b><br />

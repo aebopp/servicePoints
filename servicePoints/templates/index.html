@@ -107,11 +107,13 @@
                     <a class="btn btn-default btn-lg btn-block" href="/accounts/viewMemberPoints/" role:"button" style="background-color:#03DAC6;">View Points</a>
                 </p>
                 {% endif %}
-                <h2>Your Info: </h2>
-                <p>Username: {{username}}</p>
-                <p>Organization: {{org}}</p>
-                <p>Hours: {{hours}}</p>
-                <hr class="d-sm-none">
+                <div>
+                    <h2>Your Info: </h2>
+                    <p>Username: {{username}}</p>
+                    <p>Organization: {{org}}</p>
+                    <p>Hours: {{hours}}</p>
+                    <hr class="d-sm-none">
+                </div>
             </div>
         </div>
     </div>
@@ -170,11 +172,13 @@
                             <label for="service">Select the type of service:</label>
 
                             <select name="service" id="service" class="form-control">
-                                <option value="mask">Mask-Making</option>
-                                <option value="blood">Donating Blood</option>
-                                <option value="tutor">Tutoring</option>
-                                <option value="food">Donating Food</option>
+                                <option value="blood">Blood Drive</option>
+                                <option value="food">Food Drive</option>
                             </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="description">Enter a Title or Name for the Drive:</label>
+                            <input class="form-control" name="name" type="text" placeholder="Enter a Name" required>
                         </div>
                         <div class="form-group">
                             <label for="description">Enter a brief description of the service:</label>
