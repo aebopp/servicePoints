@@ -63,7 +63,6 @@ def create():
     if flask.request.method == 'POST':
         cursor = servicePoints.model.get_db().cursor()
         name = str(flask.request.form['username'])
-        orgName = str(flask.request.form['orgName'])
         
         to_add = (name,)
         cursor.execute('SELECT * FROM users WHERE username=?', to_add)
@@ -221,7 +220,11 @@ def index():
             leader = 0
         else:
             leader = 1
-        context = {'username': username, 'org': results["orgName"], 'hours': results["hours"], 'leader': leader}
+        flask.session["leader"] = leader
+        flask.session["hours"] = results["hours"]
+        flask.session["orgName"] = results["orgName"]
+        context = {'username': username, 'org': results["orgName"], 'hours': results["hours"], 
+                   'leader': leader, 'serviceMsg': '', 'submitMsg': ''}
         return render_template('index.html', **context)
     return flask.redirect(flask.url_for('login'))
 
@@ -492,15 +495,30 @@ def submitPoints():
             leader = results["username"]
         cursor.execute('INSERT INTO requests(member, leader, service, filename) VALUES '
             '(:one,:two,:three,:four)', {"one": username, "two": leader, "three": serviceType, "four": hash_filename_basename})
-        return flask.redirect(flask.url_for('confirmSubmission'))
-    username = flask.session["username"]
-    cursor = servicePoints.model.get_db()
-    studentOrgCur = cursor.execute('SELECT orgName, hours FROM users WHERE '
-                        'username =:who',
-                        {"who": username})
-    results = studentOrgCur.fetchone()
-    context = {'username': username, 'org': results["orgName"], 'hours': results["hours"]}
-    return render_template('submitPoints.html', **context)
+
+        context = {'username': flask.session["username"], 'org': flask.session['orgName'], 'hours': flask.session["hours"], 
+                   'leader': flask.session["leader"], 'serviceMsg' :'', 'submitMsg':'Your Service has been submitted'}
+        return render_template('index.html', **context)
+
+    return flask.redirect(flask.url_for('index'))
+
+@servicePoints.app.route('/accounts/submitService/', methods=['GET', 'POST'])
+def submitService():
+    if flask.request.method == 'POST':
+        serviceType = flask.request.form["service"]
+        description = flask.request.form["description"]
+        link = flask.request.form["link"]
+
+        data = (serviceType, description, link)
+
+        cursor = servicePoints.model.get_db()
+        cursor.execute("INSERT INTO posts(service, description, link) VALUES (?, ?, ?)", data)
+
+        context = {'username': flask.session["username"], 'org': flask.session['orgName'], 'hours': flask.session["hours"], 
+                   'leader': flask.session["leader"], 'serviceMsg' :'Your post has been submitted', 'submitMsg':''}
+        return render_template('index.html', **context)
+    
+    return flask.redirect(flask.url_for('index'))
 
 @servicePoints.app.route('/accounts/confirmSubmission/', methods=['GET', 'POST'])
 def confirmSubmission():

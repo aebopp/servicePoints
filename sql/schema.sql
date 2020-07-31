@@ -46,3 +46,12 @@ CREATE TABLE requests(
 	  FOREIGN KEY(member) REFERENCES users(username) ON UPDATE CASCADE
 		ON DELETE CASCADE
 );
+
+
+CREATE TABLE posts(
+	  postid INTEGER NOT NULL,
+	  service VARCHAR(40) NOT NULL,
+	  description VARCHAR(128) NOT NULL,
+	  link VARCHAR(128) NOT NULL,
+	  PRIMARY KEY(postid)
+);
