@@ -80,16 +80,17 @@ def create():
             flask.session['password'] = flask.request.form['password']
 
             pw = hash_pass(flask.session['password'])
+            cur = servicePoints.model.get_db()
             data = (flask.session['username'], flask.session['fullname'],
                     flask.session['email'], 'NONE',
                     pw, 0)
-            pendingData = (flask.session['username'], flask.session['fullname'],
-                    flask.session['email'], flask.session['orgName'], 0)
-            cur = servicePoints.model.get_db()
             cur.execute("INSERT INTO users(username, fullname, email, orgName, "
                         "password, hours) VALUES (?, ?, ?, ?, ?, ?)", data)
-            cur.execute("INSERT INTO pendingOrgs(username, fullname, email, orgName, "
-                        "hours) VALUES (?, ?, ?, ?, ?)", pendingData)
+            if flask.session['orgName'] != 'NONE':
+                pendingData = (flask.session['username'], flask.session['fullname'],
+                               flask.session['email'], flask.session['orgName'], 0)
+                cur.execute("INSERT INTO pendingOrgs(username, fullname, email, orgName, "
+                            "hours) VALUES (?, ?, ?, ?, ?)", pendingData)
 
             return flask.redirect(flask.url_for('index'))
 
@@ -242,16 +243,29 @@ def hash_pass(password_in):
 @servicePoints.app.route('/accounts/delete/', methods=['GET', 'POST'])
 def delete():
     """Render delete page."""
-    if flask.request.method == 'POST':
-        name = (flask.session['username'])
-        to_add = (name,)
-        cur = servicePoints.model.get_db()
+    name = (flask.session['username'])
+    to_add = (name,)
+    cur = servicePoints.model.get_db()
 
-        flask.session.clear()
-        cur.execute('DELETE FROM users WHERE username=?', to_add)
-        return flask.redirect(flask.url_for('login'))
-    context = {'username': flask.session['username']}
-    return render_template('delete.html', **context)
+    flask.session.clear()
+    cur.execute('DELETE FROM users WHERE username=?', to_add)
+    return flask.redirect(flask.url_for('login'))
+
+@servicePoints.app.route('/accounts/deleteOrg/', methods=['GET', 'POST'])
+def deleteOrg():
+    """Render delete page."""
+    username = flask.session["username"]
+    cursor = servicePoints.model.get_db()
+    leaderCur = cursor.execute('SELECT orgName FROM orgs WHERE '
+        'username =:who',
+        {"who": username})
+    results = leaderCur.fetchone()
+    orgName = results["orgName"]
+    cursor.execute("DELETE from orgs WHERE orgName = ?", (orgName,))
+    cursor.execute("UPDATE users SET orgName = 'NONE' WHERE orgName = ?", (orgName,))
+    cursor.execute("UPDATE requests SET leader = 'pending' WHERE leader = ?",
+                            (username,))
+    return flask.redirect(flask.url_for('index'))
 
 @servicePoints.app.route('/accounts/hourError/', methods=['GET', 'POST'])
 def hourError():
@@ -381,7 +395,7 @@ def profile():
     cur = cursor.execute("SELECT * FROM orgs")
     username = flask.session['username']
     orgs = cur.fetchall()
-    cur = cursor.execute("SELECT fullname, email, orgName from users WHERE username = ?", (username,))
+    cur = cursor.execute("SELECT fullname, email, orgName, hours from users WHERE username = ?", (username,))
     user = cur.fetchone()
     studentOrgCur = cursor.execute('SELECT orgName, hours FROM users WHERE '
                             'username =:who',
@@ -395,13 +409,15 @@ def profile():
         leader = 0
     else:
         leader = 1
+
     cur = cursor.execute('SELECT * FROM pendingOrgs WHERE username =:who', {"who": username})
     tryfetch = cur.fetchone()
     if tryfetch is None:
         pending = 0
     else:
         pending = 1
-    context = {"orgs": orgs, "fullname": user["fullname"], "email": user["email"], 
+
+    context = {"orgs": orgs, "fullname": user["fullname"], "email": user["email"], "username": username, "hours": results["hours"],
         "org": user["orgName"], "leader": leader, "pending": pending}
     return render_template('userProfile.html', **context)
 
@@ -567,18 +583,6 @@ def manageOrg():
     if 'username' in flask.session:
         username = flask.session["username"]
         if flask.request.method == 'POST':
-            if 'delete' in flask.request.form:
-                cursor = servicePoints.model.get_db()
-                leaderCur = cursor.execute('SELECT orgName FROM orgs WHERE '
-                    'username =:who',
-                    {"who": username})
-                results = leaderCur.fetchone()
-                orgName = results["orgName"]
-                cursor.execute("DELETE from orgs WHERE orgName = ?", (orgName,))
-                cursor.execute("UPDATE users SET orgName = 'NONE' WHERE orgName = ?", (orgName,))
-                cursor.execute("UPDATE requests SET leader = 'pending' WHERE leader = ?",
-                                        (username,))
-                return flask.redirect(flask.url_for('index'))
             if 'add' in flask.request.form:
                 cursor = servicePoints.model.get_db()
                 leaderCur = cursor.execute('SELECT orgName FROM orgs WHERE '
