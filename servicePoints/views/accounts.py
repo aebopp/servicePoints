@@ -5,6 +5,7 @@ import flask
 import shutil
 import tempfile
 from flask import render_template
+from flask import flash
 import servicePoints
 APP = flask.Flask(__name__)
 
@@ -225,8 +226,9 @@ def index():
         flask.session["hours"] = results["hours"]
         flask.session["orgName"] = results["orgName"]
         context = {'username': username, 'org': results["orgName"], 'hours': results["hours"], 
-                   'leader': leader, 'serviceMsg': '', 'submitMsg': ''}
+                   'leader': leader}
         return render_template('index.html', **context)
+
     return flask.redirect(flask.url_for('login'))
 
 def hash_pass(password_in):
@@ -328,6 +330,7 @@ def food():
 def profile():
 
     if flask.request.method == 'POST':
+        #Join a new org
         if 'orgName' in flask.request.form:
             orgName = str(flask.request.form['orgName'])
             username = str(flask.session['username'])
@@ -349,11 +352,7 @@ def profile():
             if org == "NONE":
                 cur.execute('DELETE from orgs WHERE username = ?',
                                             (username,))
-            leadercur = cur.execute('SELECT username from orgs WHERE orgName = ?',
-                                        (orgName,))
-            leader = leadercur.fetchone()                            
-            cur.execute('UPDATE requests SET leader = ? WHERE member = ?',
-                                        (leader["username"], username,))
+            # Leave current org and do not join new one
         elif 'noOrg' in flask.request.form:
             username = str(flask.session['username'])
             cur = servicePoints.model.get_db()
@@ -365,12 +364,14 @@ def profile():
                                         (username,))
             cur.execute("UPDATE requests SET leader = 'pending' WHERE member = ?",
                                         (username,))
+            # Change name
         elif 'fullname' in flask.request.form: 
             fullName = str(flask.request.form['fullname'])
             username = str(flask.session['username'])
             cur = servicePoints.model.get_db()
             cur.execute('UPDATE users SET fullname = ? WHERE username = ?',
                                         (fullName, username,))
+            # Change email
         elif 'email' in flask.request.form: 
             email = str(flask.request.form['email'])
             username = str(flask.session['username'])
@@ -511,12 +512,10 @@ def submitPoints():
                             {"who": orgName})
             results = studentOrgLeader.fetchone()
             leader = results["username"]
+
         cursor.execute('INSERT INTO requests(member, leader, service, description, filename) VALUES '
             '(:one,:two,:three,:four,:five)', {"one": username, "two": leader, "three": serviceType, "four": description, "five": hash_filename_basename})
-
-        context = {'username': flask.session["username"], 'org': flask.session['orgName'], 'hours': flask.session["hours"], 
-                   'leader': flask.session["leader"], 'serviceMsg' :'', 'submitMsg':'Your Service has been submitted'}
-        return render_template('index.html', **context)
+        flash('service')
 
     return flask.redirect(flask.url_for('index'))
 
@@ -532,10 +531,7 @@ def submitService():
 
         cursor = servicePoints.model.get_db()
         cursor.execute("INSERT INTO posts(service, name, description, link) VALUES (?, ?, ?, ?)", data)
-
-        context = {'username': flask.session["username"], 'org': flask.session['orgName'], 'hours': flask.session["hours"], 
-                   'leader': flask.session["leader"], 'serviceMsg' :'Your post has been submitted', 'submitMsg':''}
-        return render_template('index.html', **context)
+        flash('post')
     
     return flask.redirect(flask.url_for('index'))
 
@@ -570,6 +566,7 @@ def manageOrg():
     if 'username' in flask.session:
         username = flask.session["username"]
         if flask.request.method == 'POST':
+            # Adds user to org
             if 'add' in flask.request.form:
                 cursor = servicePoints.model.get_db()
                 leaderCur = cursor.execute('SELECT orgName FROM orgs WHERE '
@@ -581,9 +578,11 @@ def manageOrg():
                 cursor.execute('UPDATE users SET orgName = ? WHERE username = ? ', (orgName, flask.request.form["user"],))
                 cursor.execute("UPDATE requests SET leader = ? WHERE member = ?",
                                         (username, flask.request.form["user"],))
+            # Denies user from org
             if 'deny' in flask.request.form:
                 cursor = servicePoints.model.get_db()
                 cursor.execute("DELETE from pendingOrgs WHERE username = ?", (flask.request.form["user"],))
+            # Removes user from org
             if 'remove' in flask.request.form:
                 cursor = servicePoints.model.get_db()
                 cursor.execute("UPDATE users SET orgName = 'NONE' WHERE username = ? ", (flask.request.form["user"],))
