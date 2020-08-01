@@ -243,19 +243,18 @@ def hash_pass(password_in):
 @servicePoints.app.route('/accounts/delete/', methods=['GET', 'POST'])
 def delete():
     # Delete Account
-    name = (flask.session['username'])
-    to_add = (name,)
+    username = (flask.session['username'])
+    to_add = (username,)
     cur = servicePoints.model.get_db()
 
-    #if flask.session["leader"] == 1:
-    #    leaderCur = cursor.execute('SELECT orgName FROM orgs WHERE '
-    #    'username =:who',d
-    #    {"who": username})
-    #    results = leaderCur.fetchone()
-    #    orgName = results["orgName"]
-    #    cursor.execute("DELETE from orgs WHERE orgName = ?", (orgName,))
-    #    cursor.execute("UPDATE users SET orgName = 'NONE' WHERE orgName = ?", (orgName,))
-    #    cursor.execute("UPDATE requests SET leader = 'pending' WHERE leader = ?", (username,))
+    if flask.session["leader"] == 1:
+        leaderCur = cur.execute('SELECT orgName FROM orgs WHERE '
+        'username =:who', {"who": username})
+        results = leaderCur.fetchone()
+        orgName = results["orgName"]
+        cur.execute("DELETE from orgs WHERE orgName = ?", (orgName,))
+        cur.execute("UPDATE users SET orgName = 'NONE' WHERE orgName = ?", (orgName,))
+        cur.execute("UPDATE requests SET leader = 'pending' WHERE leader = ?", (username,))
 
     flask.session.clear()
     cur.execute('DELETE FROM users WHERE username=?', to_add)
@@ -276,28 +275,6 @@ def deleteOrg():
     cursor.execute("UPDATE requests SET leader = 'pending' WHERE leader = ?",
                             (username,))
     return flask.redirect(flask.url_for('index'))
-
-@servicePoints.app.route('/accounts/hourError/', methods=['GET', 'POST'])
-def hourError():
-    if flask.request.method == 'POST':
-        return flask.redirect(flask.url_for('viewRequests'))
-    context = {}
-    return render_template('hourError.html', **context)
-
-
-@servicePoints.app.route('/accounts/duplicateTutor/', methods=['GET', 'POST'])
-def duplicateTutor():
-    if flask.request.method == 'POST':
-        return flask.redirect(flask.url_for('tutorsu'))
-    context = {}
-    return render_template('duplicateTutor.html', **context)
-
-@servicePoints.app.route('/accounts/incompleteForm/<prev>', methods=['GET', 'POST'])
-def incompleteForm(prev):
-    if flask.request.method == 'POST':
-        return flask.redirect(flask.url_for(prev))
-    context = {"prev": prev}
-    return render_template('incompleteForm.html', **context)
 
 @servicePoints.app.route('/accounts/mask/')
 def mask():
@@ -437,69 +414,68 @@ def images(filename):
         return flask.send_from_directory(servicePoints.app.config['IMAGES_FOLDER'], filename, as_attachment=True)
     return flask.redirect(flask.url_for('login'))
 
+@servicePoints.app.route('/accounts/deleteTutor/', methods=['GET', 'POST'])
+def deleteTutor():
+    # Delete Tutor Account
+    cur = servicePoints.model.get_db()
+    cur.execute("DELETE from tutors WHERE username = ?", (flask.session['username'],))
+
+    return flask.redirect(flask.url_for('tutorsu'))
+
+@servicePoints.app.route('/accounts/updateTutor/', methods=['GET', 'POST'])
+def updateTutor():
+    flask.session['subjects'] = flask.request.form['subjects']
+    flask.session['time'] = flask.request.form['time']
+
+    data2 = (flask.session['subjects'], flask.session['time'],
+            flask.session['username'])
+
+    cur = servicePoints.model.get_db()
+    cur.execute("UPDATE tutors SET subject=?, time=? WHERE username = ?", data2)
+
+    return flask.redirect(flask.url_for('tutorsu'))
+
 @servicePoints.app.route('/accounts/tutorsu/', methods=['GET', 'POST'])
 def tutorsu():
 
     if flask.request.method == 'POST':
-        if 'sign' in flask.request.form:
-            flask.session['subjects'] = flask.request.form['subjects']
-            flask.session['time'] = flask.request.form['time']
-            cursor = servicePoints.model.get_db().cursor()
-            name = str(flask.session['username'])
+        flask.session['subjects'] = flask.request.form['subjects']
+        flask.session['time'] = flask.request.form['time']
 
-            # If a user tries to sign up with any empty fields
-            if flask.session['time'] == '':
-                return flask.redirect(flask.url_for('incompleteForm', prev="tutorsu")) 
-            if flask.session['subjects'] == '':
-                return flask.redirect(flask.url_for('incompleteForm', prev="tutorsu")) 
+        data = (flask.session['username'], flask.session['subjects'],
+                flask.session['time'])
 
-            data = (flask.session['username'], flask.session['subjects'],
-                    flask.session['time'])
-            data2 = (flask.session['subjects'], flask.session['time'],
-                    flask.session['username'])
+        cur = servicePoints.model.get_db()
+        cur.execute("INSERT INTO tutors(username, subject, time) VALUES (?, ?, ?)", data)
 
-            to_add = (name,)
-            cursor.execute('SELECT * FROM tutors WHERE username=?', to_add)
-            if cursor.fetchone() is not None:
-                cur = servicePoints.model.get_db()
-                cur.execute("UPDATE tutors SET subject=?, time=? WHERE username = ?", data2)
-                registered = 1
-            else:
-                cur = servicePoints.model.get_db()
-                cur.execute("INSERT INTO tutors(username, subject, time) VALUES (?, ?, ?)", data)
-                registered = 0
-
-            return flask.redirect(flask.url_for('tutorsu'))
-        if 'delete' in flask.request.form:
-            cur = servicePoints.model.get_db()
-            cur.execute("DELETE from tutors WHERE username = ?", (flask.session['username'],))
+        return flask.redirect(flask.url_for('tutorsu'))
 
     cursor = servicePoints.model.get_db().cursor()
-    name = str(flask.session['username'])
-    to_add = (name,)
-    cursor.execute('SELECT * FROM tutors WHERE username=?', to_add)
-    if cursor.fetchone() is not None:
-        registered = 1
-    else:
-        registered = 0
+    username = flask.session["username"]
 
-    cursor = servicePoints.model.get_db()
     cur = cursor.execute("SELECT subject, time FROM tutors")
     tutors = cur.fetchall()
 
     cur2 = cursor.execute('SELECT fullname, email FROM users WHERE username IN (SELECT username FROM tutors)')
     tutorsN = cur2.fetchall()
 
-    username = flask.session["username"]
-    cursor = servicePoints.model.get_db()
-    studentOrgCur = cursor.execute('SELECT orgName, hours FROM users WHERE '
-                            'username =:who',
+    studentOrgCur = cursor.execute('SELECT orgName, hours FROM users WHERE username =:who',
                             {"who": username})
     results = studentOrgCur.fetchone()
 
     # Add database info to context
+    cur3 = cursor.execute('SELECT subject, time FROM tutors WHERE username =:who',
+                            {"who": username})
+    tutorInfo = cur3.fetchone()
+    if not tutorInfo:
+        registered = 0
+        context = {"tutors": tutors, "tutorsN": tutorsN, 'username': username, 'org': results["orgName"], 
+                   'hours': results["hours"], "registered": registered}
+    else:
+        registered = 1
+        context = {"tutors": tutors, "tutorsN": tutorsN, 'userSubjects': tutorInfo["subject"], "userTimes": tutorInfo["time"], 
+               'username': username, 'org': results["orgName"], 'hours': results["hours"], "registered": registered}
 
-    context = {"tutors": tutors, "tutorsN": tutorsN, 'username': username, 'org': results["orgName"], 'hours': results["hours"], "registered": registered}
     return flask.render_template("tutor.html", **context,zip=zip)
 
 @servicePoints.app.route('/accounts/submitPoints/', methods=['GET', 'POST'])
