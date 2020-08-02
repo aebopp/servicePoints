@@ -57,3 +57,16 @@ CREATE TABLE posts(
 	  link VARCHAR(128) NOT NULL,
 	  PRIMARY KEY(postid)
 );
+
+CREATE TABLE pastRequests(
+	  postid INTEGER NOT NULL,
+	  member VARCHAR(20) NOT NULL,
+	  service VARCHAR(40) NOT NULL,
+	  points INTEGER NOT NULL,
+	  description VARCHAR(128) NOT NULL,
+	  PRIMARY KEY(postid)
+);
+
+
+
+

@@ -169,34 +169,41 @@ def viewMemberPoints():
 
 @servicePoints.app.route('/accounts/viewRequests/', methods=['GET', 'POST'])
 def viewRequests():
+
     if 'username' in flask.session:
+        cursor = servicePoints.model.get_db()
+        username = flask.session["username"]
+
         if flask.request.method == 'POST':
             if 'deny' in flask.request.form:
                 post = flask.request.form["postid"]
                 file = flask.request.form["filename"]
-                servicePoints.model.get_db().execute('DELETE FROM requests WHERE postid =:one ', 
+                serviceType = flask.request.form["service"]
+                description = flask.request.form["reason"]
+                cursor.execute('INSERT INTO pastRequests(member, service, points, description) VALUES '
+                               '(:one,:two,:three,:four)', {"one": username, "two": serviceType, "three": 0, "four": description})
+                cursor.execute('DELETE FROM requests WHERE postid =:one ', 
                 {"one": post})
                 os.remove(os.path.join(servicePoints.app.config["IMAGES_FOLDER"], file))
             if 'confirm' in flask.request.form:
-                try:
-                    numHours = int(flask.request.form["numHours"])
-                except:
-                    return flask.redirect(flask.url_for('hourError'))
+                numHours = int(flask.request.form["numHours"])
                 post = flask.request.form["postid"]
                 user = flask.request.form["user"]
                 file = flask.request.form["filename"]
+                serviceType = flask.request.form["service"]
                 hours = servicePoints.model.get_db().execute('SELECT hours FROM users WHERE username =:one ', 
                 {"one": user})
                 dbHours = hours.fetchone()
                 dbHours["hours"] += numHours
-                servicePoints.model.get_db().execute('UPDATE users SET hours =:one WHERE username =:two ', 
-                {"one": dbHours["hours"], "two": user})
-                servicePoints.model.get_db().execute('DELETE FROM requests WHERE postid =:one ', 
-                {"one": post})
+
+                cursor.execute('UPDATE users SET hours =:one WHERE username =:two ', 
+                             {"one": dbHours["hours"], "two": user})
+                cursor.execute('INSERT INTO pastRequests(member, service, points, description) VALUES '
+                               '(:one,:two,:three,:four)', {"one": username, "two": serviceType, "three": numHours, "four": ''})
+                cursor.execute('DELETE FROM requests WHERE postid =:one ', {"one": post})
+
                 os.remove(os.path.join(servicePoints.app.config["IMAGES_FOLDER"], file))
 
-        username = flask.session["username"]
-        cursor = servicePoints.model.get_db()
         leaderCur = cursor.execute('SELECT postid, member, service, description, filename FROM requests WHERE '
                     'leader =:who',
                     {"who": username})
@@ -225,8 +232,19 @@ def index():
         flask.session["leader"] = leader
         flask.session["hours"] = results["hours"]
         flask.session["orgName"] = results["orgName"]
+
+        pendingReq = cursor.execute('SELECT service, description FROM requests WHERE '
+                            'member =:who',
+                            {"who": username})
+        requests = pendingReq.fetchall()
+
+        pastReq = cursor.execute('SELECT service, points, description FROM pastRequests WHERE '
+                            'member =:who',
+                            {"who": username})
+        pastRequests = pastReq.fetchmany(5)
+
         context = {'username': username, 'org': results["orgName"], 'hours': results["hours"], 
-                   'leader': leader}
+                   'leader': leader, 'requests':requests, 'pastReq':pastRequests}
         return render_template('index.html', **context)
 
     return flask.redirect(flask.url_for('login'))

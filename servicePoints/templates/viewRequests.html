@@ -86,6 +86,7 @@
                         <input type="hidden" name="postid" value="{{request.postid}}" />
                         <input type="hidden" name="user" value="{{request.member}}" />
                         <input type="hidden" name="filename" value="{{request.filename}}" />
+                        <input type="hidden" name="service" value="{{request.service}}" />
                         <input type="number" name="numHours" required />
                         <input type="submit" name="confirm" value="confirm" />
                     </form>
@@ -93,7 +94,8 @@
                     <form action="/accounts/viewRequests/" method="post" enctype="multipart/form-data">
                         <input type="hidden" name="postid" value="{{request.postid}}" />
                         <input type="hidden" name="filename" value="{{request.filename}}" />
-                        <textarea class="form-control" name="reason" rows="2" placeholder="Enter a Description" required></textarea>    
+                        <input type="hidden" name="service" value="{{request.service}}" />
+                        <textarea class="form-control" name="reason" rows="2" placeholder="Enter a Description" required maxlength="128"></textarea>
                         <input type="submit" name="deny" value="deny" />
                     </form>
                 </div>
