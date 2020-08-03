@@ -6,8 +6,11 @@ import shutil
 import tempfile
 from flask import render_template
 from flask import flash
+from flask import request
 import servicePoints
 APP = flask.Flask(__name__)
+APP.config['MAX_IMAGE_FILESIZE'] = 1024 * 1024
+APP.config['ALLOWED_IMAGE_EXTENSIONS'] = ["JPEG", "JPG", "PNG", "GIF"]
 
 servicePoints.app.secret_key = b'''\xf4\xb2\x9f\x80\xb1\xef\x01\xc6\x10\xca
     \xdd\x84\xd4\xf3\x0c\x95\xad\xa6\xdc\xaf\xd3\xbeI\xf7'''
@@ -184,7 +187,6 @@ def viewRequests():
                                '(:one,:two,:three,:four)', {"one": username, "two": serviceType, "three": 0, "four": description})
                 cursor.execute('DELETE FROM requests WHERE postid =:one ', 
                 {"one": post})
-                os.remove(os.path.join(servicePoints.app.config["IMAGES_FOLDER"], file))
             if 'confirm' in flask.request.form:
                 numHours = int(flask.request.form["numHours"])
                 post = flask.request.form["postid"]
@@ -202,7 +204,9 @@ def viewRequests():
                                '(:one,:two,:three,:four)', {"one": username, "two": serviceType, "three": numHours, "four": ''})
                 cursor.execute('DELETE FROM requests WHERE postid =:one ', {"one": post})
 
+            if file != '':
                 os.remove(os.path.join(servicePoints.app.config["IMAGES_FOLDER"], file))
+                
 
         leaderCur = cursor.execute('SELECT postid, member, service, description, filename FROM requests WHERE '
                     'leader =:who',
@@ -497,6 +501,26 @@ def tutorsu():
 
     return flask.render_template("tutor.html", **context,zip=zip)
 
+def allowed_image(filename):
+
+    if not "." in filename:
+        return False
+
+    ext = filename.rsplit(".", 1)[1]
+
+    if ext.upper() in APP.config["ALLOWED_IMAGE_EXTENSIONS"]:
+        return True
+    else:
+        return False
+
+
+def allowed_image_filesize(filesize):
+
+    if int(filesize) <= APP.config["MAX_IMAGE_FILESIZE"]:
+        return True
+    else:
+        return False
+
 @servicePoints.app.route('/accounts/submitPoints/', methods=['GET', 'POST'])
 def submitPoints():
     if flask.request.method == 'POST':
@@ -504,36 +528,55 @@ def submitPoints():
         file = flask.request.files["file"]
         serviceType = flask.request.form["service"]
         description = flask.request.form["description"]
-        file.save(temp_filename)
+        hash_filename_basename = ''
+        msg = ''
 
-        # Compute filename
-        hash_txt = sha256sum(temp_filename)
-        dummy, suffix = os.path.splitext(file.filename)
-        hash_filename_basename = hash_txt + suffix
-        hash_filename = os.path.join(servicePoints.app.config["IMAGES_FOLDER"],
-            hash_filename_basename)
+        #Checks if a file has been submitted
+        if "filesize" in request.cookies:
 
-        # Move temp file to permanent location
-        shutil.move(temp_filename, hash_filename)
-        cursor = servicePoints.model.get_db()
-        username = flask.session["username"]
-        studentOrgCur = cursor.execute('SELECT orgName FROM users WHERE '
-                        'username =:who',
-                        {"who": username})
-        results = studentOrgCur.fetchone()
-        orgName = results["orgName"]
-        if orgName == "NONE":
-            leader = "pending"
+            # Checks if the photo is not too big
+            if not allowed_image_filesize(request.cookies["filesize"]):
+                msg = 'photo'
+
+            else:
+                # Checks if the file is an image 
+                if allowed_image(file.filename):
+                    file.save(temp_filename)
+
+                    # Compute filename
+                    hash_txt = sha256sum(temp_filename)
+                    dummy, suffix = os.path.splitext(file.filename)
+                    hash_filename_basename = hash_txt + suffix
+                    hash_filename = os.path.join(servicePoints.app.config["IMAGES_FOLDER"],
+                        hash_filename_basename)
+
+                    # Move temp file to permanent location
+                    shutil.move(temp_filename, hash_filename)
+                else:
+                    msg = 'photo'
+
+        if msg == '':
+            cursor = servicePoints.model.get_db()
+            username = flask.session["username"]
+            studentOrgCur = cursor.execute('SELECT orgName FROM users WHERE '
+                            'username =:who',
+                            {"who": username})
+            results = studentOrgCur.fetchone()
+            orgName = results["orgName"]
+            if orgName == "NONE":
+                leader = "pending"
+            else:
+                studentOrgLeader = cursor.execute('SELECT username FROM orgs WHERE '
+                                'orgName =:who',
+                                {"who": orgName})
+                results = studentOrgLeader.fetchone()
+                leader = results["username"]
+
+            cursor.execute('INSERT INTO requests(member, leader, service, description, filename) VALUES '
+                '(:one,:two,:three,:four,:five)', {"one": username, "two": leader, "three": serviceType, "four": description, "five": hash_filename_basename})
+            flash('service')
         else:
-            studentOrgLeader = cursor.execute('SELECT username FROM orgs WHERE '
-                            'orgName =:who',
-                            {"who": orgName})
-            results = studentOrgLeader.fetchone()
-            leader = results["username"]
-
-        cursor.execute('INSERT INTO requests(member, leader, service, description, filename) VALUES '
-            '(:one,:two,:three,:four,:five)', {"one": username, "two": leader, "three": serviceType, "four": description, "five": hash_filename_basename})
-        flash('service')
+            flash(msg)
 
     return flask.redirect(flask.url_for('index'))
 

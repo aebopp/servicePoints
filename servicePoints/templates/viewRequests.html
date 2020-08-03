@@ -76,10 +76,13 @@
                         {{request.member}} is requesting ServicePoints for ({{request.service}}):
                     </h6>
                     <p>
-                        {{request.description}}
+                        Provided Description: {{request.description}}
                     </p>
                     <p>
-                        <img src=/images/{{request.filename}} class="img-fluid" alt="Responsive image">
+                        Provided Photo:
+                        {% if request.filename != '' %}
+                        <img src=/images/{{request.filename}} class="img-fluid" alt="No Photo">
+                        {% endif %}
                     </p>
                     Enter the number of hours you'd like to assign:
                     <form action="/accounts/viewRequests/" method="post" enctype="multipart/form-data">

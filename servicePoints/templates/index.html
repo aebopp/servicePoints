@@ -36,15 +36,17 @@
     </style>
 
     <script type="text/javascript">
-        function changeImage(im) {
-            var img = document.getElementById("image");
-            img.src = "images/test2";
-            return false;
+        function filesize(elem) {
+            document.cookie = `filesize=${elem.files[0].size}`
         }
+
+        function deleteCookie() {
+            document.cookie = "filesize=; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
+        } 
     </script>
 
 </head>
-<body>
+<body onload="deleteCookie()">
     <div class="jumbotron text-center" style="margin-bottom:0; ">
         <h1>ServicePoints!</h1>
         <p>Connect with your Org</p>
@@ -188,6 +190,13 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
+                {% elif message == 'photo' %}
+                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    <strong>There was an error uploading your image! Please try again and make sure the image is a PNG, JPG, JPEG, or GIF file.</strong>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
                 {% endif %}
                 {% endfor %}
                 {% endif %}
@@ -224,9 +233,9 @@
     <div class="modal fade" id="pointsModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
-                <div class="modal-header">
+                <div class="modal-header" style="background-color: #6a1b9a; color: #eeeeee; border-radius: 4px;">
                     <h4 class="modal-title" id="myModalLabel">Submit Points</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="color: #fff; opacity: 1;">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
@@ -248,11 +257,11 @@
                         </div>
                         <div class="form-group">
                             <label for="file">Photo for proof of service</label>
-                            <input type="file" name="file" class="form-control-file">
+                            <input type="file" name="file" class="form-control-file" accept="image/*" oninput="filesize(this);">
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                            <input type="submit" class="btn btn-primary" name="update" value="Submit" />
+                            <button type="button" class="btn" data-dismiss="modal" style="border: solid 2px #80cbc4;">Close</button>
+                            <input type="submit" class="btn" name="update" value="Submit" style="background-color: #80cbc4;" />
                         </div>
                     </form>
                 </div>
@@ -263,9 +272,9 @@
     <div class="modal fade" id="serviceModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
-                <div class="modal-header">
+                <div class="modal-header" style="background-color: #6a1b9a; color: #eeeeee; border-radius: 4px;">
                     <h4 class="modal-title" id="myModalLabel">Submit a Service Opportunity</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="color: #fff; opacity: 1;">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
@@ -289,11 +298,11 @@
                         </div>
                         <div class="form-group">
                             <label for="file">Enter a link to the service</label>
-                            <input type="url" name="link" class="form-control" placeholder="Link:">
+                            <input type="url" name="link" class="form-control" placeholder="Link:" required>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                            <input type="submit" class="btn btn-primary" name="update" value="Submit" />
+                            <button type="button" class="btn" data-dismiss="modal" style="border: solid 2px #80cbc4;">Close</button>
+                            <input type="submit" class="btn" name="update" value="Submit" style="background-color: #80cbc4;"/>
                         </div>
                     </form>
                 </div>
