@@ -9,6 +9,28 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
 
     <title>Profile</title>
+
+    <style>
+        .about {
+            padding: 14px 16px;
+            background-color: lightgray;
+            margin: 10px;
+            border-radius: 7px;
+        }
+
+        .title {
+            padding: 4px 16px;
+            margin: -14px -16px 10px -16px;
+            background-color: #6a1b9a;
+            color: #eeeeee;
+            border-radius: 7px;
+        }
+
+        .categ {
+            background-color: #e0e0e0;
+            border-radius: 50%;
+        }
+    </style>
 </head>
 <body>
 
@@ -17,13 +39,15 @@
         <p>Connect with your Org</p>
     </div>
 
-    <nav class="navbar navbar-expand-sm navbar-dark" style="background-color:#7952b3;">
-        <a class="navbar-brand" href="/">Home</a>
+    <nav class="navbar navbar-expand-sm navbar-dark" style="background-color:#38006b; font-size: 19px;">
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="collapsibleNavbar">
             <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Home</a>
+                </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/accounts/blood/">Blood Drives</a>
                 </li>
@@ -59,7 +83,8 @@
     <div class="container" style="margin-top:30px">
         <div class="row">
             <div class="col-sm-8">
-                <h2>Profile</h2>
+                <h2 class="display-4" style="color:#6a1b9a"><b>Profile</b></h2>
+                <hr style="background-color:#6a1b9a"/>
                 {% if pending != '' %}
                 <div class="alert alert-warning alert-dismissible fade show" role="alert">
                     <strong>
@@ -94,37 +119,104 @@
                 {% endif %}
                 {% endif %}
 
-                <form action="/accounts/profile/" method="post">
-                    <p>
-                        Change your full name:
-                        <input type="text" name="fullname" required maxlength="30" />
-                        <input type="submit" name="fullname" value="Change Full Name" />
-                    </p>
+                <h2 style="margin-bottom: 20px; margin-top: 20px;" class="title">Pending Service Points:</h2>
+                {% for request in requests %}
+                <hr style="background-color:purple;">
+                <div class="media">
+                    <div class="media-left media-middle categ mr-2">
+                        {% if request.service == 'mask' %}
+                        <img src=/images/masks.png alt="masks" class="media-object" style="width:80px;">
+                        {% elif request.service == 'tutor' %}
+                        <img src=/images/tutor2.png alt="masks" class="media-object" style="width:80px; padding: 10px;">
+                        {% elif request.service == 'blood' %}
+                        <img src=/images/blood2.png alt="masks" class="media-object" style="height:80px; padding: 10px 22.5px;">
+                        {% else %}
+                        <img src=/images/can2.png class="media-object" style="width:80px; padding: 5px;">
+                        {% endif %}
+                    </div>
+                    <div class="media-body">
+                        <h6> Your submission is pending.</h6>
+                        <p>
+                            Description: {{request.description}}
+                        </p>
+                    </div>
+                </div>
+                {% endfor %}
+                <hr style="background-color:purple;">
+                {% if not requests %}
+                <h6>No pending Service Requests</h6>
+                <hr style="background-color:purple;">
+                {% endif %}
 
-                </form>
-
-                <form action="/accounts/profile/" method="post">
-                    <p>
-                        Change your email:
-                        <input type="email" name="email" required maxlength="40" />
-                        <input type="submit" name="email" value="Change Email" />
-                    </p>
-
-                </form>
+                <h2 style="margin-bottom: 20px; margin-top:20px;" class="title">Your Past Service:</h2>
+                {% for request in pastReq %}
+                <hr style="background-color:purple;">
+                <div class="media">
+                    <div class="media-left media-middle categ mr-2">
+                        {% if request.service == 'mask' %}
+                        <img src=/images/masks.png alt="masks" class="media-object" style="width:80px;">
+                        {% elif request.service == 'tutor' %}
+                        <img src=/images/tutor2.png alt="masks" class="media-object" style="width:80px; padding: 10px;">
+                        {% elif request.service == 'blood' %}
+                        <img src=/images/blood2.png alt="masks" class="media-object" style="height:80px; padding: 10px 22.5px;">
+                        {% else %}
+                        <img src=/images/can2.png class="media-object" style="width:80px; padding: 5px;">
+                        {% endif %}
+                    </div>
+                    <div class="media-body">
+                        {% if request.description == '' %}
+                        <h6> This submission was accepted.</h6>
+                        <p>
+                            Points: {{request.points}}
+                        </p>
+                        {% else %}
+                        <h6> This submission was denied.</h6>
+                        <p>
+                            Reason: {{request.description}}
+                        </p>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+                <hr style="background-color:purple;">
+                {% if not pastReq %}
+                <h6>No past Service Requests</h6>
+                <hr style="background-color:purple;">
+                {% endif %}
             </div>
             <div class="col-sm-4">
-                <div>
-                    <h2>Your Info: </h2>
+                <div class="about">
+                    <div class="title"><h4>Your Info: </h4></div>
                     <p>Full Name: {{fullname}}</p>
                     <p>Username: {{username}}</p>
                     <p>Organization: {{org}}</p>
                     <p>Email: {{email}}</p>
                     <p>Hours: {{hours}}</p>
                     <hr class="d-sm-none">
-                    <p>
-                        <a class="btn btn-default btn-lg btn-block" href="" data-toggle="modal" data-target="#deleteModal" style="background-color:#03DAC6;">Delete Account</a>
-                    </p>
                 </div>
+                <div class="about">
+                    <h3 class="title">Update User Info:</h3>
+
+                    <form action="/accounts/profile/" method="post">
+                        <p>
+                            Change your full name:
+                            <input type="text" name="fullname" required maxlength="30" />
+                            <input type="submit" name="fullname" value="Change Full Name" />
+                        </p>
+
+                    </form>
+
+                    <form action="/accounts/profile/" method="post">
+                        <p>
+                            Change your email:
+                            <input type="email" name="email" required maxlength="40" />
+                            <input type="submit" name="email" value="Change Email" />
+                        </p>
+
+                    </form>
+                    <hr />
+                </div>
+                <a class="btn btn-default btn-lg btn-block" href="" data-toggle="modal" data-target="#deleteModal" style="background-color:#03DAC6;">Delete Account</a>
             </div>
         </div>
     </div>

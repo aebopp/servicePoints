@@ -237,18 +237,8 @@ def index():
         flask.session["hours"] = results["hours"]
         flask.session["orgName"] = results["orgName"]
 
-        pendingReq = cursor.execute('SELECT service, description FROM requests WHERE '
-                            'member =:who',
-                            {"who": username})
-        requests = pendingReq.fetchall()
-
-        pastReq = cursor.execute('SELECT service, points, description FROM pastRequests WHERE '
-                            'member =:who',
-                            {"who": username})
-        pastRequests = pastReq.fetchmany(5)
-
         context = {'username': username, 'org': results["orgName"], 'hours': results["hours"], 
-                   'leader': leader, 'requests':requests, 'pastReq':pastRequests}
+                   'leader': leader}
         return render_template('index.html', **context)
 
     return flask.redirect(flask.url_for('login'))
@@ -427,8 +417,19 @@ def profile():
     else:
         pending = trypending["orgName"]
 
+        
+    pendingReq = cursor.execute('SELECT service, description FROM requests WHERE '
+                        'member =:who',
+                        {"who": username})
+    requests = pendingReq.fetchall()
+
+    pastReq = cursor.execute('SELECT * FROM pastRequests WHERE '
+                        'member =:who ORDER BY postid DESC',
+                        {"who": username})
+    pastRequests = pastReq.fetchmany(5)
+
     context = {"orgs": orgs, "fullname": user["fullname"], "email": user["email"], "username": username, "hours": results["hours"],
-        "org": user["orgName"], "leader": leader, "pending": pending}
+        "org": user["orgName"], "leader": leader, "pending": pending, 'requests':requests, 'pastReq':pastRequests}
     return render_template('userProfile.html', **context)
 
 @servicePoints.app.route('/images/<path:filename>', methods=['GET', 'POST'])
