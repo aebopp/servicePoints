@@ -92,7 +92,8 @@
     <div class="container" style="margin-top:30px">
         <div class="row">
             <div class="col-sm-8">
-                <h2 style="margin-bottom: 20px; margin-top: 20px;" class="title">Blood Drives</h2>
+                <h2 style="color: #6a1b9a;" class="display-4"><b>Blood Drives</b></h2>
+                <hr style="background-color:purple;">
                 {% for bloodPost in bloodDs %}
                 <div class="listing">
                     {{bloodPost.name}}<br />
@@ -101,7 +102,6 @@
                 </div>
                 {% endfor %}
 
-                <hr style="background-color:purple;">
                 {% if not bloodDs %}
                 <h6>No Blood Drives Currently</h6>
                 <hr style="background-color:purple;">

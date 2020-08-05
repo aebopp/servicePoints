@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
     <!-- Required meta tags -->
@@ -18,6 +18,14 @@
             border-radius: 7px;
         }
 
+        .title {
+            padding: 4px 16px;
+            margin: -14px -16px 10px -16px;
+            background-color: #6a1b9a;
+            color: #eeeeee;
+            border-radius: 7px;
+        }
+
         .listing {
             float: left;
             display: block;
@@ -25,6 +33,11 @@
             margin: 10px;
             border-radius: 7px;
             border: 3px solid black;
+        }
+
+        .btn-width {
+            width: 100%;
+            background-color: #80cbc4;
         }
     </style>
 </head>
@@ -37,13 +50,15 @@
         <p>Connect with your Org</p>
     </div>
 
-    <nav class="navbar navbar-expand-sm navbar-dark" style="background-color:#7952b3;">
-        <a class="navbar-brand" href="/">Home</a>
+    <nav class="navbar navbar-expand-sm navbar-dark" style="background-color:#38006b; font-size: 19px;">
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="collapsibleNavbar">
             <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Home</a>
+                </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/accounts/blood/">Blood Drives</a>
                 </li>
@@ -53,7 +68,7 @@
                 <li class="nav-item">
                     <a class="nav-link" href="/accounts/mask/">Mask Making</a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item active">
                     <a class="nav-link" href="">Tutoring</a>
                 </li>
             </ul>
@@ -79,8 +94,9 @@
     <div class="container" style="margin-top:30px">
         <div class="row">
             <div class="col-sm-6 col-md-8">
-                <h2>Welcome to the Service Points Tutoring page!</h2>
-                <p>Search through our database of current tutors</p>
+                <h2 style="color: #6a1b9a;">Welcome to the Service Points Tutoring page!</h2>
+                <h6>Search through our database of current tutors</h6>
+                <hr style="background-color:purple;">
                 {% for tutor, user in zip(tutors, tutorsN) %}
                 <div class="listing">
                     {{user.fullname}}<br />
@@ -92,12 +108,12 @@
             </div>
             <div class="col-sm-6 col-md-4">
                 <div class="about">
-                    <h2>About</h2>
+                    <div class="title"><h4>About</h4></div>
                     <p>Tutoring...</p>
                 </div>
                 <div class="about">
                     {% if registered == 0 %}
-                    <h3>Sign up for Tutoring:</h3>
+                    <h3 class="title">Sign up for Tutoring:</h3>
                     <form action="/accounts/tutorsu/" method="post" enctype="multipart/form-data">
                         <div class="form-group">
                             <label for="subjects">Enter the tutoring subject(s):</label>
@@ -107,12 +123,12 @@
                             <label for="time">Enter available times (Day of the week: times):</label>
                             <textarea class="form-control" name="time" rows="2" placeholder="Enter times" maxlength="80" required></textarea>
                         </div>
-                        <input type="submit" class="btn btn-primary btn-block" name="sign" value="Sign Up" />
+                        <input type="submit" class="btn btn-lg btn-width" name="sign" value="Sign Up" />
                     </form>
                     <small>Signing up for tutoring will list your email for potential users to contact you.</small>
                     {% endif %}
                     {% if registered == 1 %}
-                    <h3>Update Tutor Info:</h3>
+                    <h3 class="title">Update Tutor Info:</h3>
                     <form action="/accounts/updateTutor/" method="post" enctype="multipart/form-data">
                         <div class="form-group">
                             <label for="subjects">Enter your updated tutoring subject(s):</label>
@@ -122,14 +138,14 @@
                             <label for="time">Enter your updated available time(s):</label>
                             <textarea class="form-control" name="time" rows="2" placeholder="Enter times" maxlength="80" required>{{userTimes}}</textarea>
                         </div>
-                        <input type="submit" class="btn btn-primary btn-block" name="update" value="Update Info" />
+                        <input type="submit" class="btn btn-default btn-lg btn-width" name="update" value="Update Info" />
                     </form>
                     <hr />
-                    <a class="btn btn-default btn-primary btn-block" href="" data-toggle="modal" data-target="#deleteModal" style="margin-top: 10px;">Delete Tutor Profile</a>
+                    <a class="btn btn-default btn-lg btn-width" href="" data-toggle="modal" data-target="#deleteModal" style="margin-top: 10px;">Delete Tutor Profile</a>
                     {% endif %}
                 </div>
-                <div>
-                    <h2>Your Info: </h2>
+                <div class="about">
+                    <div class="title"><h4>Your Info: </h4></div>
                     <p>Username: {{username}}</p>
                     <p>Organization: {{org}}</p>
                     <p>Hours: {{hours}}</p>
@@ -143,14 +159,14 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h3 class="modal-title" id="myModalLabel" style="text-align:center;">Are you sure you want to delete your tutor profile?</h3>
+                    <h3 class="modal-title" id="myModalLabel" style="text-align:center; color:#6a1b9a;">Are you sure you want to delete your tutor profile?</h3>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
-                    <a class="btn btn-primary" href="/accounts/deleteTutor/" role="button">Yes</a>
+                    <button type="button" class="btn" data-dismiss="modal" style="border: solid 2px #80cbc4;">No</button>
+                    <a class="btn" href="/accounts/deleteTutor/" role="button" style="background-color: #80cbc4;">Yes</a>
                 </div>
             </div>
         </div>

@@ -17,6 +17,14 @@
             margin: 10px;
             border-radius: 7px;
         }
+
+        .title {
+            padding: 4px 16px;
+            margin: -14px -16px 10px -16px;
+            background-color: #6a1b9a;
+            color: #eeeeee;
+            border-radius: 7px;
+        }
     </style>
 </head>
 <body>
@@ -25,20 +33,22 @@
         <p>Connect with your Org</p>
     </div>
 
-    <nav class="navbar navbar-expand-sm navbar-dark" style="background-color:#7952b3;">
-        <a class="navbar-brand" href="/">Home</a>
+    <nav class="navbar navbar-expand-sm navbar-dark" style="background-color:#38006b; font-size: 19px;">
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="collapsibleNavbar">
             <ul class="navbar-nav mr-auto">
                 <li class="nav-item">
+                    <a class="nav-link" href="/">Home</a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link" href="/accounts/blood/">Blood Drives</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/accounts/food/">Food Drives</a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item active">
                     <a class="nav-link" href="">Mask Making</a>
                 </li>
                 <li class="nav-item">
@@ -63,12 +73,12 @@
         </div>
     </nav>
 
-
     <div class="container" style="margin-top:30px">
         <div class="row">
             <div class="col-sm-8" style="margin:25px 0px;">
                 <div>
-                    <h1>How to Make Masks</h1>
+                    <h1 style="color: #6a1b9a;">How to Make Masks</h1>
+                    <hr style="background-color:purple;">
                     <div class="embed-responsive embed-responsive-16by9">
                         <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/VgHrnS6n4iA" frameborder="0"
                                 allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
@@ -77,7 +87,8 @@
                         Above is a video tutorial for making masks with simple materials that can be bought cheaply or found around the home.
                     </b>
                 </div>
-                <h2 style="margin-top: 50px;">Where to donate masks</h2>
+                <h1 style="color: #6a1b9a; margin-top: 50px;">Donating Masks</h1>
+                <hr style="background-color:purple;">
                 <p>
                     Find places can be tricky as the stock in masks rises around the country. Donations can still be useful for organizations or communities
                     that might not be able to purchase masks. Places to donate in your local area can be found through some searches on google.
@@ -87,11 +98,11 @@
             </div>
             <div class="col-sm-4">
                 <div class="about">
-                    <h2>About</h2>
+                    <div class="title"><h4>About</h4></div>
                     <p>Masks...</p>
                 </div>
-                <div>
-                    <h2>Your Info: </h2>
+                <div class="about">
+                    <div class="title"><h4>Your Info: </h4></div>
                     <p>Username: {{username}}</p>
                     <p>Organization: {{org}}</p>
                     <p>Hours: {{hours}}</p>
