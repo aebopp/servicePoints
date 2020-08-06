@@ -298,7 +298,7 @@ def mask():
                             'username =:who',
                             {"who": username})
     results = studentOrgCur.fetchone()
-    context = {'username': username, 'org': results["orgName"], 'hours': results["hours"]}
+    context = {'username': username, 'org': results["orgName"], 'hours': results["hours"], 'leader': flask.session["leader"]}
     return render_template('mask.html', **context)
 
 @servicePoints.app.route('/accounts/blood/')
@@ -316,7 +316,8 @@ def blood():
     bloodDs = bloodDrives.fetchall()
 
     # Add database info to context
-    context = {'username': username, 'org': results["orgName"], 'hours': results["hours"], 'bloodDs': bloodDs}
+    context = {'username': username, 'org': results["orgName"], 'hours': results["hours"], 
+               'bloodDs': bloodDs, 'leader': flask.session["leader"]}
 
     return render_template('blood.html', **context)
 
@@ -335,7 +336,8 @@ def food():
     foodDs = foodDrives.fetchall()
 
     # Add database info to context
-    context = {'username': username, 'org': results["orgName"], 'hours': results["hours"], 'foodDs': foodDs}
+    context = {'username': username, 'org': results["orgName"], 'hours': results["hours"], 
+               'foodDs': foodDs, 'leader': flask.session["leader"]}
     return render_template('food.html', **context)
 
 @servicePoints.app.route('/accounts/profile/', methods=['GET', 'POST'])
@@ -494,11 +496,12 @@ def tutorsu():
     if not tutorInfo:
         registered = 0
         context = {"tutors": tutors, "tutorsN": tutorsN, 'username': username, 'org': results["orgName"], 
-                   'hours': results["hours"], "registered": registered}
+                   'hours': results["hours"], "registered": registered, 'leader': flask.session["leader"]}
     else:
         registered = 1
         context = {"tutors": tutors, "tutorsN": tutorsN, 'userSubjects': tutorInfo["subject"], "userTimes": tutorInfo["time"], 
-               'username': username, 'org': results["orgName"], 'hours': results["hours"], "registered": registered}
+               'username': username, 'org': results["orgName"], 'hours': results["hours"], 
+               "registered": registered, 'leader': flask.session["leader"]}
 
     return flask.render_template("tutor.html", **context,zip=zip)
 
@@ -656,11 +659,13 @@ def manageOrg():
                     {"who": username})
         results = leaderCur.fetchone()
         orgName = results["orgName"]
-        membersCur = cursor.execute('SELECT username, fullname FROM users WHERE orgname =:who', {"who": orgName})
+
+        membersCur = cursor.execute('SELECT * FROM users WHERE orgname =:who', {"who": orgName})
         members = membersCur.fetchall()
         pendingCur = cursor.execute('SELECT username, fullname, email, hours FROM pendingOrgs WHERE '
                     'orgName =:who',
                     {"who": orgName})
+
         pending = pendingCur.fetchall()
         context = {'org': orgName, 'members': members, 'username': username, 'pending': pending, 'hours': flask.session["hours"]}
         return render_template('manageOrg.html', **context)

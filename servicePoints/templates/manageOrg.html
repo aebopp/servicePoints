@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
     <!-- Required meta tags -->
@@ -13,7 +13,7 @@
             margin: 10px 0px;
             border-radius: 7px;
             border: 3px solid black;
-            width:100%;
+            width: 100%;
         }
 
         .members {
@@ -21,7 +21,27 @@
             margin: 10px 0px 50px 0px;
             border-radius: 7px;
             border: 3px solid black;
-            float:left;
+            float: left;
+        }
+
+        .about {
+            padding: 14px 16px;
+            background-color: lightgray;
+            margin: 10px;
+            border-radius: 7px;
+        }
+
+        .title {
+            padding: 4px 16px;
+            margin: -14px -16px 10px -16px;
+            background-color: #6a1b9a;
+            color: #eeeeee;
+            border-radius: 7px;
+        }
+
+        .btn-width {
+            width: 100%;
+            background-color: #80cbc4;
         }
     </style>
 
@@ -35,13 +55,15 @@
         <p>Connect with your Org</p>
     </div>
 
-    <nav class="navbar navbar-expand-sm navbar-dark" style="background-color:#7952b3;">
-        <a class="navbar-brand" href="/">Home</a>
+    <nav class="navbar navbar-expand-sm navbar-dark" style="background-color:#38006b; font-size: 19px;">
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="collapsibleNavbar">
             <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Home</a>
+                </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/accounts/blood/">Blood Drives</a>
                 </li>
@@ -75,7 +97,8 @@
     <div class="container" style="margin-top:30px">
         <div class="row">
             <div class="col-sm-8">
-                <h2>Manage Your Organization: {{org}} </h2>
+                <h2 style="color: #6a1b9a;">Manage Your Organization: {{org}} </h2>
+                <hr style="background-color: #6a1b9a;" />
                 <h4>Pending Member Requests:</h4>
 
                 {% for member in pending %}
@@ -95,33 +118,51 @@
                 No pending memberships
                 {% endif %}
 
+                <hr style="background-color: #6a1b9a;" />
                 <h4 style="margin-top:25px;">Current Members:</h4>
-                <div class="members">
-                    {% for member in members %}
-                    {% if username == member.username %}
-                    {{member.fullname}} ({{member.username}})
-                    {% else %}
-
-                    <form action="/accounts/manageOrg/" method="post" enctype="multipart/form-data">
-                        {{member.fullname}} ({{member.username}})
-                        <input type="hidden" name="user" value="{{member.username}}" />
-                        <input type="submit" name="remove" value="remove from org" />
-                    </form>
-                    {% endif %}
-                    {% endfor %}
-                </div>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th scope="col">Full Name</th>
+                            <th scope="col">Username</th>
+                            <th scope="col">Email</th>
+                            <th scope="col">Hours</th>
+                            <th scope="col">Manage</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for member in members %}
+                        <tr>
+                            <th scope="row">{{member.fullname}}</th>
+                            <td>{{member.username}}</td>
+                            <td>{{member.email}}</td>
+                            <td>{{member.hours}}</td>
+                            {% if username == member.username %}
+                            <td>Admin</td>
+                            {% else %}
+                            <td>
+                                <form action="/accounts/manageOrg/" method="post" enctype="multipart/form-data">
+                                    <input type="hidden" name="user" value="{{member.username}}" />
+                                    <input type="submit" name="remove" value="remove from org" />
+                                </form>
+                            </td>
+                            {% endif %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
 
             </div>
             <div class="col-sm-4">
-                <div>
-                    <h2>Your Info: </h2>
+                <div class="about">
+                    <div class="title"><h4>Your Info: </h4></div>
                     <p>Username: {{username}}</p>
                     <p>Organization: {{org}}</p>
                     <p>Hours: {{hours}}</p>
                     <hr class="d-sm-none">
                 </div>
                 <p>
-                    <a class="btn btn-default btn-lg btn-block" href="" data-toggle="modal" data-target="#deleteModal" style="background-color:#03DAC6;">Delete Your Organization</a>
+                    <a class="btn btn-width btn-lg btn-block" href="" data-toggle="modal" data-target="#deleteModal">Delete Your Organization</a>
                 </p>
             </div>
         </div>
@@ -136,10 +177,10 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-
+                <small style="text-align:center;">If you delete your organization, you will not be able to make another one.</small>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
-                    <a class="btn btn-primary" href="/accounts/deleteOrg/" role="button">Yes</a>
+                    <button type="button" class="btn" data-dismiss="modal" style="border: solid 2px #80cbc4;">No</button>
+                    <a class="btn" href="/accounts/deleteOrg/" role="button" style="background-color: #80cbc4;">Yes</a>
                 </div>
             </div>
         </div>

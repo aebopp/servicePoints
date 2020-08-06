@@ -15,6 +15,21 @@
             border: 3px solid black;
             width: 100%;
         }
+
+        .about {
+            padding: 14px 16px;
+            background-color: lightgray;
+            margin: 10px;
+            border-radius: 7px;
+        }
+
+        .title {
+            padding: 4px 16px;
+            margin: -14px -16px 10px -16px;
+            background-color: #6a1b9a;
+            color: #eeeeee;
+            border-radius: 7px;
+        }
     </style>
 
     <title>View Requests</title>
@@ -28,13 +43,15 @@
         <p>Connect with your Org</p>
     </div>
 
-    <nav class="navbar navbar-expand-sm navbar-dark" style="background-color:#7952b3;">
-        <a class="navbar-brand" href="/">Home</a>
+    <nav class="navbar navbar-expand-sm navbar-dark" style="background-color:#38006b; font-size: 19px;">
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="collapsibleNavbar">
             <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Home</a>
+                </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/accounts/blood/">Blood Drives</a>
                 </li>
@@ -68,8 +85,8 @@
     <div class="container" style="margin-top:30px">
         <div class="row">
             <div class="col-sm-8">
-                <h2>Manage Your Organization Member's Requests: </h2>
-
+                <h2 style="color: #6a1b9a;">Manage Your Organization Member's Requests: </h2>
+                <hr style="background-color:purple;">
                 {% for request in requests %}
                 <div class="listing">
                     <h6>
@@ -108,8 +125,8 @@
                 {% endif %}
             </div>
             <div class="col-sm-4">
-                <div>
-                    <h2>Your Info: </h2>
+                <div class="about">
+                    <div class="title"><h4>Your Info: </h4></div>
                     <p>Username: {{username}}</p>
                     <p>Organization: {{org}}</p>
                     <p>Hours: {{hours}}</p>

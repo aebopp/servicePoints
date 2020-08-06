@@ -30,6 +30,11 @@
             background-color: #e0e0e0;
             border-radius: 50%;
         }
+
+        .btn-width {
+            width: 100%;
+            background-color: #80cbc4;
+        }
     </style>
 </head>
 <body>
@@ -216,7 +221,7 @@
                     </form>
                     <hr />
                 </div>
-                <a class="btn btn-default btn-lg btn-block" href="" data-toggle="modal" data-target="#deleteModal" style="background-color:#03DAC6;">Delete Account</a>
+                <a class="btn btn-width btn-lg btn-block" href="" data-toggle="modal" data-target="#deleteModal">Delete Account</a>
             </div>
         </div>
     </div>
@@ -235,8 +240,8 @@
                     {% if leader == 1 %}
                     <small style="text-align:center;">Deleting your account will also delete your organization and all members will be kicked out</small>
                     {% endif %}
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
-                    <a class="btn btn-primary" href="/accounts/delete/" role="button">Yes</a>
+                    <button type="button" class="btn" data-dismiss="modal" style="border: solid 2px #80cbc4;">No</button>
+                    <a class="btn" href="/accounts/delete/" role="button" style="background-color: #80cbc4;">Yes</a>
                 </div>
             </div>
         </div>
