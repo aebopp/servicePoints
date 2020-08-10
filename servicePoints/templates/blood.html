@@ -12,11 +12,10 @@
 
     <style>
         .listing {
-            float: left;
             padding: 14px 16px;
             margin: 10px;
             border-radius: 7px;
-            border: 3px solid black;
+            background-color: lightgray;
         }
 
         .about {
@@ -88,7 +87,6 @@
         </div>
     </nav>
 
-
     <div class="container" style="margin-top:30px">
         <div class="row">
             <div class="col-sm-8">
@@ -96,10 +94,19 @@
                 <hr style="background-color:purple;">
                 {% for bloodPost in bloodDs %}
                 <div class="listing">
-                    {{bloodPost.name}}<br />
-                    {{bloodPost.description}}<br />
-                    {{bloodPost.link}}<br />
+
+                    <h2>
+                        <span style="color:#6a1b9a;">{{bloodPost.name}}</span>
+                        {% if bloodPost.poster == username %}
+                        <a class="btn float-right" href="/accounts/deleteService/{{bloodPost.postid}}" role="button" style="background-color: darkred; color:white;">Delete Post</a>
+                        {% endif %}
+                    </h2>
+                    <hr />
+
+                    <div style="word-break: break-word;"><b>Description:</b> {{bloodPost.description}}</div>
+                    <h6>Link: <a href="{{bloodPost.link}}">{{bloodPost.link}}</a></h6>
                 </div>
+                <hr style="background-color:purple;">
                 {% endfor %}
 
                 {% if not bloodDs %}
@@ -108,6 +115,18 @@
                 {% endif %}
             </div>
             <div class="col-sm-4">
+                {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    <strong>Your Post had been deleted</strong>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                {% endfor %}
+                {% endif %}
+                {% endwith %}
                 <div class="about">
                     <div class="title"><h4>About</h4></div>
                     <p>Blood...</p>
