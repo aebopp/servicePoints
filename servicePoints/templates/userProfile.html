@@ -106,6 +106,7 @@
                     <p>
                         <label for="orgName">Select an Organization:</label>
                         <select name="orgName" id="orgName">
+                            <option value="" selected disabled hidden>Choose here</option>
                             {% for org in orgs %}
                             {% if org.orgName != 'NONE' %}
                             <option value="{{org.orgName}}">{{org.orgName}}</option>
@@ -203,20 +204,19 @@
                     <h3 class="title">Update User Info:</h3>
 
                     <form action="/accounts/profile/" method="post">
-                        <p>
-                            Change your full name:
-                            <input type="text" name="fullname" required maxlength="30" />
-                            <input type="submit" name="fullname" value="Change Full Name" />
-                        </p>
-
+                        <div class="form-group">
+                            <label for="fullname">Change your full name:</label>
+                            <input class="form-control" name="fullname" type="text" placeholder="Enter updated name" maxlength="30" required>
+                            <input type="submit" class="btn btn-default btn-width" name="fullname" value="Update Full Name" style="margin-top: 10px;" />
+                        </div>
                     </form>
 
                     <form action="/accounts/profile/" method="post">
-                        <p>
-                            Change your email:
-                            <input type="email" name="email" required maxlength="40" />
-                            <input type="submit" name="email" value="Change Email" />
-                        </p>
+                        <div class="form-group">
+                            <label for="fullname">Change your email:</label>
+                            <input class="form-control" type="email" name="email" placeholder="Enter updated email" required maxlength="40" />
+                            <input type="submit" class="btn btn-default btn-width" name="email" value="Update Email" style="margin-top: 10px;"/>
+                        </div>
 
                     </form>
                     <hr />
