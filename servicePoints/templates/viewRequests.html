@@ -30,6 +30,11 @@
             color: #eeeeee;
             border-radius: 7px;
         }
+
+        .btns {
+            background-color: #80cbc4;
+            width: 100%;
+        }
     </style>
 
     <title>View Requests</title>
@@ -89,34 +94,47 @@
                 <hr style="background-color:purple;">
                 {% for request in requests %}
                 <div class="listing">
-                    <h6>
+                    <h5 style="color: #6a1b9a">
                         {{request.member}} is requesting ServicePoints for ({{request.service}}):
-                    </h6>
-                    <p>
-                        Provided Description: {{request.description}}
-                    </p>
-                    <p>
-                        Provided Photo:
-                        {% if request.filename != '' %}
-                        <img src=/images/{{request.filename}} class="img-fluid" alt="No Photo">
-                        {% endif %}
-                    </p>
-                    Enter the number of hours you'd like to assign:
+                    </h5>
+
+                    <b>Provided Description:</b> {{request.description}} <br />
+                    {% if request.filename != '' %}
+                    <b>Provided Photo:</b> <br />
+                    <img src=/images/{{request.filename}} alt="No Photo" style="width:75%; height:auto;">
+                    {% else %}
+                    <p>No image provided</p>
+                    {% endif %}
+                    <br />
+                    <label for="numHours"><b>Enter the number of hours you'd like to assign:</b></label>
                     <form action="/accounts/viewRequests/" method="post" enctype="multipart/form-data">
                         <input type="hidden" name="postid" value="{{request.postid}}" />
                         <input type="hidden" name="user" value="{{request.member}}" />
                         <input type="hidden" name="filename" value="{{request.filename}}" />
                         <input type="hidden" name="service" value="{{request.service}}" />
-                        <input type="number" name="numHours" required />
-                        <input type="submit" name="confirm" value="confirm" />
+                        <div class="form-row">
+                            <div class="col-8">
+                                <input type="number" name="numHours" class="form-control" placeholder="Enter a number" required />
+                            </div>
+                            <div class="col">
+                                <input type="submit" name="confirm" value="Confirm" class="btn btn-default btns" />
+                            </div>
+                        </div>
+
                     </form>
-                    Or give an explanation as to why you're denying this request:
+                    <b>Or give an explanation as to why you're denying this request:</b>
                     <form action="/accounts/viewRequests/" method="post" enctype="multipart/form-data">
                         <input type="hidden" name="postid" value="{{request.postid}}" />
                         <input type="hidden" name="filename" value="{{request.filename}}" />
                         <input type="hidden" name="service" value="{{request.service}}" />
-                        <textarea class="form-control" name="reason" rows="2" placeholder="Enter a Description" required maxlength="128"></textarea>
-                        <input type="submit" name="deny" value="deny" />
+                        <div class="form-row">
+                            <div class="col-8">
+                                <textarea class="form-control" name="reason" rows="2" placeholder="Enter a Description" required maxlength="128"></textarea>
+                            </div>
+                            <div class="col">
+                                <input type="submit" name="deny" value="Deny" class="btn btn-default btns" />
+                            </div>
+                        </div>
                     </form>
                 </div>
                 {% endfor %}
