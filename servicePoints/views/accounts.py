@@ -7,8 +7,23 @@ import tempfile
 from flask import render_template
 from flask import flash
 from flask import request
+from flask import Flask
+from flask_mail import Mail
+from flask_mail import Message
 import servicePoints
 APP = flask.Flask(__name__)
+
+APP.config.update(dict(
+    DEBUG = True,
+    MAIL_SERVER = 'smtp.gmail.com',
+    MAIL_PORT = 587,
+    MAIL_USE_TLS = True,
+    MAIL_USE_SSL = False,
+    MAIL_USERNAME = 'servicePnts@gmail.com',
+    MAIL_PASSWORD = 'SrvcPnts-2020',
+))
+
+mail = Mail(APP)
 APP.config['MAX_IMAGE_FILESIZE'] = 1024 * 1024
 APP.config['ALLOWED_IMAGE_EXTENSIONS'] = ["JPEG", "JPG", "PNG", "GIF"]
 
@@ -95,6 +110,21 @@ def create():
                                flask.session['email'], flask.session['orgName'], 0)
                 cur.execute("INSERT INTO pendingOrgs(username, fullname, email, orgName, "
                             "hours) VALUES (?, ?, ?, ?, ?)", pendingData)
+                leaderCur = cursor.execute('SELECT username FROM orgs WHERE '
+                                'orgName =:who',
+                                {"who": flask.session['orgName']})
+                results = leaderCur.fetchone()
+                leader = results["username"]   
+                leaderEmailCur = cursor.execute('SELECT email FROM users WHERE '
+                                'username =:who',
+                                {"who": leader})
+                results = leaderEmailCur.fetchone()
+                leaderEmail = results["email"]                
+                msg = Message("New Request to Join " + flask.session['orgName'],
+                    sender="servicePnts@gmail.com",
+                    recipients=[leaderEmail])
+                msg.body = "Hi " + leader + "! " + flask.session['username'] + " is requesting to join " + flask.session['orgName']
+                mail.send(msg)
 
             return flask.redirect(flask.url_for('index'))
 
@@ -363,10 +393,25 @@ def profile():
                 cur.execute("DELETE from pendingOrgs WHERE username = ?", (username,))
             cur.execute("INSERT INTO pendingOrgs(username, fullname, email, orgName, "
                     "hours) VALUES (?, ?, ?, ?, ?)", pendingData)
+            leaderCur = cursor.execute('SELECT username FROM orgs WHERE '
+                                'orgName =:who',
+                                {"who": orgName})
+            results = leaderCur.fetchone()
+            leader = results["username"]   
+            leaderEmailCur = cursor.execute('SELECT email FROM users WHERE '
+                                'username =:who',
+                                {"who": leader})
+            results = leaderEmailCur.fetchone()
+            leaderEmail = results["email"]                
+            msg = Message("New Request to Join " + orgName,
+                    sender="servicePnts@gmail.com",
+                    recipients=[leaderEmail])
+            msg.body = "Hi " + leader + "! " + flask.session['username'] + " is requesting to join " + orgName
+            mail.send(msg)
             if org == "NONE":
                 cur.execute('DELETE from orgs WHERE username = ?',
                                             (username,))
-            # Leave current org and do not join new one
+        # Leave current org and do not join new one
         elif 'noOrg' in flask.request.form:
             username = str(flask.session['username'])
             cur = servicePoints.model.get_db()
@@ -578,6 +623,17 @@ def submitPoints():
 
             cursor.execute('INSERT INTO requests(member, leader, service, description, filename) VALUES '
                 '(:one,:two,:three,:four,:five)', {"one": username, "two": leader, "three": serviceType, "four": description, "five": hash_filename_basename})
+            if leader != "pending":
+                leaderEmailCur = cursor.execute('SELECT email FROM users WHERE '
+                                'username =:who',
+                                {"who": leader})
+                results = leaderEmailCur.fetchone()
+                leaderEmail = results["email"]                
+                msg = Message("New Service Points Request",
+                    sender="servicePnts@gmail.com",
+                    recipients=[leaderEmail])
+                msg.body = "Hi " + leader + "! " + username + " is requesting service points for " + serviceType + ": " + description
+                mail.send(msg)
             flash('service')
         else:
             flash(msg)
@@ -642,11 +698,34 @@ def manageOrg():
                 cursor.execute("DELETE from pendingOrgs WHERE username = ?", (flask.request.form["user"],))
                 cursor.execute('UPDATE users SET orgName = ? WHERE username = ? ', (orgName, flask.request.form["user"],))
                 cursor.execute("UPDATE requests SET leader = ? WHERE member = ?",
-                                        (username, flask.request.form["user"],))
+                                        (username, flask.request.form["user"],)) 
+                memberEmailCur = cursor.execute('SELECT email FROM users WHERE '
+                                'username =:who',
+                                {"who": flask.request.form["user"]})
+                results = memberEmailCur.fetchone()
+                memberEmail = results["email"]                
+                msg = Message("Approved Org Request",
+                    sender="servicePnts@gmail.com",
+                    recipients=[memberEmail])
+                msg.body = "Hi " + flask.request.form["user"] + "! Your request to join " + orgName + " has been approved."
+                mail.send(msg)
             # Denies user from org
             if 'deny' in flask.request.form:
                 cursor = servicePoints.model.get_db()
                 cursor.execute("DELETE from pendingOrgs WHERE username = ?", (flask.request.form["user"],))
+                                memberEmailCur = cursor.execute('SELECT email FROM users WHERE '
+                                'username =:who',
+                                {"who": flask.request.form["user"]})
+                memberEmailCur = cursor.execute('SELECT email FROM users WHERE '
+                                'username =:who',
+                                {"who": flask.request.form["user"]})                
+                results = memberEmailCur.fetchone()
+                memberEmail = results["email"]                
+                msg = Message("Denied Org Request",
+                    sender="servicePnts@gmail.com",
+                    recipients=[memberEmail])
+                msg.body = "Hi " + flask.request.form["user"] + "! Your request to join " + orgName + " has been denied."
+                mail.send(msg)
             # Removes user from org
             if 'remove' in flask.request.form:
                 cursor = servicePoints.model.get_db()
