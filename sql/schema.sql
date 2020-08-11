@@ -53,6 +53,7 @@ CREATE TABLE requests(
 
 CREATE TABLE posts(
 	  postid INTEGER NOT NULL,
+	  poster VARCHAR(20) NOT NULL,
 	  service VARCHAR(40) NOT NULL,
 	  name VARCHAR(30) NOT NULL,
 	  description VARCHAR(128) NOT NULL,
@@ -65,7 +66,7 @@ CREATE TABLE pastRequests(
 	  member VARCHAR(20) NOT NULL,
 	  service VARCHAR(40) NOT NULL,
 	  points INTEGER NOT NULL,
-	  description VARCHAR(128) NOT NULL,
+	  description VARCHAR(256) NOT NULL,
 	  PRIMARY KEY(postid)
 );
 
