@@ -340,7 +340,7 @@ def blood():
                             {"who": username})
     results = studentOrgCur.fetchone()
 
-    bloodDrives = cursor.execute('SELECT name, description, link FROM posts WHERE '
+    bloodDrives = cursor.execute('SELECT postid, poster, name, description, link FROM posts WHERE '
                             'service =:who',
                             {"who": 'blood'})
     bloodDs = bloodDrives.fetchall()
@@ -360,7 +360,7 @@ def food():
                             {"who": username})
     results = studentOrgCur.fetchone()
 
-    foodDrives = cursor.execute('SELECT name, description, link FROM posts WHERE '
+    foodDrives = cursor.execute('SELECT postid, poster, name, description, link FROM posts WHERE '
                             'service =:who',
                             {"who": 'food'})
     foodDs = foodDrives.fetchall()
@@ -647,14 +647,24 @@ def submitService():
         description = flask.request.form["description"]
         name = flask.request.form["name"] 
         link = flask.request.form["link"]
+        username = flask.session["username"]
 
-        data = (serviceType, name, description, link)
+        data = (username, serviceType, name, description, link)
 
         cursor = servicePoints.model.get_db()
-        cursor.execute("INSERT INTO posts(service, name, description, link) VALUES (?, ?, ?, ?)", data)
+        cursor.execute("INSERT INTO posts(poster, service, name, description, link) VALUES (?, ?, ?, ?, ?)", data)
         flash('post')
     
     return flask.redirect(flask.url_for('index'))
+
+@servicePoints.app.route('/accounts/deleteService/<string:id>', methods=['GET','POST'])
+def deleteService(id):
+    flash('delete')
+    cursor = servicePoints.model.get_db()
+    cursor.execute('DELETE FROM posts WHERE postid=?', id)
+
+    return flask.redirect(flask.url_for('blood'))
+    pass
 
 @servicePoints.app.route('/accounts/confirmSubmission/', methods=['GET', 'POST'])
 def confirmSubmission():
