@@ -124,6 +124,47 @@
                 </form>
                 {% endif %}
                 {% endif %}
+                
+                {% if msg != '' %}
+                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    <strong>{{ msg }}</strong>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                {% endif %}
+                {% if leader == 1 %}
+                <form action="/accounts/profile/" name="Notifications" method="post">
+                    <p>
+                        <label for="Notifications">Receive Email Notifications For</label>
+                    </p>
+                    {%if members == 0%}
+                    <p>
+                        <input id="members" type="checkbox" name="membersBox"/>
+                        Requests to Join Your Organization
+                    </p>
+                    {%endif%}
+                    {%if members == 1%}
+                    <p>
+                        <input id="members" type="checkbox" name="membersBox" checked/>
+                        Requests to Join Your Organization
+                    </p>
+                    {%endif%}
+                    {%if reqs == 0%}
+                    <p>                        
+                        <input id="reqs" type="checkbox" name="reqsBox"/>
+                        Member Requests for ServicePoints
+                    </p>
+                    {%endif%}
+                    {%if reqs == 1%}
+                    <p>                        
+                        <input id="reqs" type="checkbox" name="reqsBox" checked/>
+                        Member Requests for ServicePoints
+                    </p>
+                    {%endif%}
+                    <input type="submit" value="Submit" name="Notifications">
+                </form>
+                {%endif%}
 
                 <h2 style="margin-bottom: 20px; margin-top: 20px;" class="title">Pending Service Points:</h2>
                 {% for request in requests %}
