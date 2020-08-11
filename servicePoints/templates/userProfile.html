@@ -103,18 +103,17 @@
 
                 {% if leader == 0 %}
                 <form action="/accounts/profile/" method="post">
-                    <p>
-                        <label for="orgName">Select an Organization:</label>
-                        <select name="orgName" id="orgName">
-                            <option value="" selected disabled hidden>Choose here</option>
-                            {% for org in orgs %}
-                            {% if org.orgName != 'NONE' %}
-                            <option value="{{org.orgName}}">{{org.orgName}}</option>
-                            {%endif%}
-                            {% endfor %}
-                        </select>
-                        <input type="submit" name="signup" value="Update Org" />
-                    </p>
+                    <b>Change Organization:</b><br />
+                    <small>Warning: When joining a new Org, the leader may reset your number of hours to 0.</small><br />
+                    <select name="orgName" id="orgName">
+                        <option value="" selected disabled hidden>Choose here</option>
+                        {% for org in orgs %}
+                        {% if org.orgName != 'NONE' %}
+                        <option value="{{org.orgName}}">{{org.orgName}}</option>
+                        {%endif%}
+                        {% endfor %}
+                    </select>
+                    <input type="submit" name="signup" value="Update Org" />
                 </form>
                 {% if org != 'NONE' %}
                 <form action="/accounts/profile/" method="post">

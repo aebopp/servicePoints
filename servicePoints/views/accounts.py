@@ -740,7 +740,10 @@ def manageOrg():
                     'username =:who',
                     {"who": username})
                 results = leaderCur.fetchone()
-                orgName = results["orgName"]                
+                orgName = results["orgName"]         
+                if flask.request.form.get("reset"):
+                    cursor.execute('UPDATE users SET hours = 0 WHERE username = ?', (flask.request.form["user"],))
+
                 cursor.execute("DELETE from pendingOrgs WHERE username = ?", (flask.request.form["user"],))
                 cursor.execute('UPDATE users SET orgName = ? WHERE username = ? ', (orgName, flask.request.form["user"],))
                 cursor.execute("UPDATE requests SET leader = ? WHERE member = ?",

@@ -109,6 +109,8 @@
                         <b>Email:</b> {{member.email}}<br />
                         <b>Pre-Existing Hours:</b> {{member.hours}}
                         <input type="hidden" name="user" value="{{member.username}}" />
+                        <input type="checkbox" name="reset" value="reset" />
+                        Check this box to reset {{member.username}}'s hours to zero.
                         <div class="text-center">
                             <input type="submit" name="add" value="Add Member" class="btn" style="background-color: #80cbc4; width: 30%;" />
                             <input type="submit" name="deny" value="Deny Member" class="btn" style="border: solid 3px #80cbc4;width: 30%;background-color: white;" />
