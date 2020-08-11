@@ -122,7 +122,7 @@ def create():
                 leaderEmail = results["email"] 
                 leaderName = results["fullname"]                
                 msg = Message("New Request to Join " + flask.session['orgName'],
-                    sender="servicePnts@gmail.com",
+                    sender=("ServicePoints", "servicePnts@gmail.com"),
                     recipients=[leaderEmail])
                 msg.body = "Hi " + leaderName + "! " + flask.session['username'] + " is requesting to join " + flask.session['orgName']
                 mail.send(msg)
@@ -406,7 +406,7 @@ def profile():
             leaderEmail = results["email"]  
             leaderName = results["fullname"]                
             msg = Message("New Request to Join " + orgName,
-                    sender="servicePnts@gmail.com",
+                    sender=("ServicePoints", "servicePnts@gmail.com"),
                     recipients=[leaderEmail])
             msg.body = "Hi " + leaderName + "! " + flask.session['username'] + " is requesting to join " + orgName
             mail.send(msg)
@@ -632,7 +632,7 @@ def submitPoints():
                 results = leaderEmailCur.fetchone()
                 leaderEmail = results["email"]                
                 msg = Message("New Service Points Request",
-                    sender="servicePnts@gmail.com",
+                    sender=("ServicePoints", "servicePnts@gmail.com"),
                     recipients=[leaderEmail])
                 msg.body = "Hi " + leader + "! " + username + " is requesting service points for " + serviceType + ": " + description
                 mail.send(msg)
@@ -717,7 +717,7 @@ def manageOrg():
                 results = memberEmailCur.fetchone()
                 memberEmail = results["email"]                
                 msg = Message("Approved Org Request",
-                    sender="servicePnts@gmail.com",
+                    sender=("ServicePoints", "servicePnts@gmail.com"),
                     recipients=[memberEmail])
                 msg.body = "Hi " + flask.request.form["user"] + "! Your request to join " + orgName + " has been approved."
                 mail.send(msg)
@@ -736,7 +736,7 @@ def manageOrg():
                 memberEmail = results["email"]
                 memberName = results["fullname"]                
                 msg = Message("Denied Org Request",
-                    sender="servicePnts@gmail.com",
+                    sender=("ServicePoints", "servicePnts@gmail.com"),
                     recipients=[memberEmail])
                 msg.body = "Hi " + memberName + "! Your request to join " + orgName + " has been denied."
                 mail.send(msg)
