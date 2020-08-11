@@ -115,15 +115,16 @@ def create():
                                 {"who": flask.session['orgName']})
                 results = leaderCur.fetchone()
                 leader = results["username"]   
-                leaderEmailCur = cursor.execute('SELECT email FROM users WHERE '
+                leaderEmailCur = cursor.execute('SELECT email, fullname FROM users WHERE '
                                 'username =:who',
                                 {"who": leader})
                 results = leaderEmailCur.fetchone()
-                leaderEmail = results["email"]                
+                leaderEmail = results["email"] 
+                leaderName = results["fullname"]                
                 msg = Message("New Request to Join " + flask.session['orgName'],
                     sender="servicePnts@gmail.com",
                     recipients=[leaderEmail])
-                msg.body = "Hi " + leader + "! " + flask.session['username'] + " is requesting to join " + flask.session['orgName']
+                msg.body = "Hi " + leaderName + "! " + flask.session['username'] + " is requesting to join " + flask.session['orgName']
                 mail.send(msg)
 
             return flask.redirect(flask.url_for('index'))
@@ -398,15 +399,16 @@ def profile():
                                 {"who": orgName})
             results = leaderCur.fetchone()
             leader = results["username"]   
-            leaderEmailCur = cursor.execute('SELECT email FROM users WHERE '
+            leaderEmailCur = cursor.execute('SELECT email, fullname FROM users WHERE '
                                 'username =:who',
                                 {"who": leader})
             results = leaderEmailCur.fetchone()
-            leaderEmail = results["email"]                
+            leaderEmail = results["email"]  
+            leaderName = results["fullname"]                
             msg = Message("New Request to Join " + orgName,
                     sender="servicePnts@gmail.com",
                     recipients=[leaderEmail])
-            msg.body = "Hi " + leader + "! " + flask.session['username'] + " is requesting to join " + orgName
+            msg.body = "Hi " + leaderName + "! " + flask.session['username'] + " is requesting to join " + orgName
             mail.send(msg)
             if org == "NONE":
                 cur.execute('DELETE from orgs WHERE username = ?',
@@ -722,19 +724,21 @@ def manageOrg():
             # Denies user from org
             if 'deny' in flask.request.form:
                 cursor = servicePoints.model.get_db()
+                leaderCur = cursor.execute('SELECT orgName FROM orgs WHERE '
+                    'username =:who',
+                    {"who": username})
+                results = leaderCur.fetchone()
+                orgName = results["orgName"] 
                 cursor.execute("DELETE from pendingOrgs WHERE username = ?", (flask.request.form["user"],))
-                                memberEmailCur = cursor.execute('SELECT email FROM users WHERE '
-                                'username =:who',
-                                {"who": flask.request.form["user"]})
-                memberEmailCur = cursor.execute('SELECT email FROM users WHERE '
-                                'username =:who',
-                                {"who": flask.request.form["user"]})                
+                memberEmailCur = cursor.execute('SELECT email, fullname FROM users WHERE '
+                    'username =:who', {"who": flask.request.form["user"]})                
                 results = memberEmailCur.fetchone()
-                memberEmail = results["email"]                
+                memberEmail = results["email"]
+                memberName = results["fullname"]                
                 msg = Message("Denied Org Request",
                     sender="servicePnts@gmail.com",
                     recipients=[memberEmail])
-                msg.body = "Hi " + flask.request.form["user"] + "! Your request to join " + orgName + " has been denied."
+                msg.body = "Hi " + memberName + "! Your request to join " + orgName + " has been denied."
                 mail.send(msg)
             # Removes user from org
             if 'remove' in flask.request.form:
