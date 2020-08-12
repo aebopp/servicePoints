@@ -90,12 +90,12 @@
     <div class="container" style="margin-top:30px">
         <div class="row">
             <div class="col-sm-8">
-                <h2 style="color: #6a1b9a;">Manage Your Organization Member's Requests: </h2>
+                <h2 style="color: #6a1b9a;">Manage Your Organization Members' Requests: </h2>
                 <hr style="background-color:purple;">
                 {% for request in requests %}
                 <div class="listing">
                     <h5 style="color: #6a1b9a">
-                        {{request.member}} is requesting ServicePoints for ({{request.service}}):
+                        {{request.member}} is requesting ServicePoints for {{request.service}}:
                     </h5>
 
                     <b>Provided Description:</b> {{request.description}} <br />

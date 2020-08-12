@@ -4,6 +4,8 @@ import os
 import flask
 import shutil
 import tempfile
+import random
+import string
 from flask import render_template
 from flask import flash
 from flask import request
@@ -38,30 +40,54 @@ def login():
     if 'username' in flask.session:
         return flask.redirect(flask.url_for('index'))
     if flask.request.method == 'POST':
-        cursor = servicePoints.model.get_db().cursor()
-        pass_user = flask.request.form['password']
-        password_1 = cursor.execute('SELECT password FROM users WHERE '
-                                    'username =:who',
-                                    {"who": flask.request.form['username']})
-        password_3 = password_1.fetchall()
-        if not password_3:
-            msg = 'Incorrect login credentials'
-        else:
-            password_2 = password_3[0]['password']
-            password_4 = password_2.split('$')
-            algorithm = password_4[0]
-            salt = password_4[1]
-            p2word = password_4[2]
-            hash_obj = hashlib.new(algorithm)
-            password_salted = salt + pass_user
-            hash_obj.update(password_salted.encode('utf-8'))
-            password_hash = hash_obj.hexdigest()
-            # if the password does not exist
-            if p2word != password_hash:
+        if 'login' in flask.request.form:
+            cursor = servicePoints.model.get_db().cursor()
+            pass_user = flask.request.form['password']
+            password_1 = cursor.execute('SELECT password FROM users WHERE '
+                                        'username =:who',
+                                        {"who": flask.request.form['username']})
+            password_3 = password_1.fetchall()
+            if not password_3:
                 msg = 'Incorrect login credentials'
             else:
-                flask.session['username'] = flask.request.form['username']
-                return flask.redirect(flask.url_for('index'))
+                password_2 = password_3[0]['password']
+                password_4 = password_2.split('$')
+                algorithm = password_4[0]
+                salt = password_4[1]
+                p2word = password_4[2]
+                hash_obj = hashlib.new(algorithm)
+                password_salted = salt + pass_user
+                hash_obj.update(password_salted.encode('utf-8'))
+                password_hash = hash_obj.hexdigest()
+                # if the password does not exist
+                if p2word != password_hash:
+                    msg = 'Incorrect login credentials'
+                else:
+                    flask.session['username'] = flask.request.form['username']
+                    return flask.redirect(flask.url_for('index'))
+        elif 'pass' in flask.request.form:
+            cursor = servicePoints.model.get_db().cursor()
+            user = flask.request.form['username']
+            emailcur = cursor.execute('SELECT email FROM users WHERE '
+                                        'username =:who',
+                                        {"who": user})
+            emailres = emailcur.fetchone()
+            if not emailres:
+                msg = 'This account does not exist'
+            else:
+                email = emailres["email"] 
+                letters = string.ascii_letters
+                result_str = ''.join(random.choice(letters) for i in range(10))
+                pw = hash_pass(result_str)
+                cursor.execute('UPDATE users SET password =:one WHERE username =:two ', 
+                            {"one": pw, "two": user})
+                emsg = Message("ServicePoints Password Update",
+                        sender=("ServicePoints", "servicePnts@gmail.com"),
+                        recipients=[email])
+                emsg.body = "Once logging into your account, you can change your password on your profile page. Your new ServicePoints password is " + result_str + ""
+                mail.send(emsg)
+                msg = "An email has been sent to the address associated with this username"
+
     return render_template('login.html', **context, msg=msg)
 
 @servicePoints.app.route('/accounts/logout/')
@@ -217,6 +243,16 @@ def viewRequests():
                                '(:one,:two,:three,:four)', {"one": username, "two": serviceType, "three": 0, "four": description})
                 cursor.execute('DELETE FROM requests WHERE postid =:one ', 
                 {"one": post})
+                rescur = cursor.execute('SELECT fullname, orgName, email FROM users WHERE username = ?', (username,))
+                results = rescur.fetchone()
+                fullname = results["fullname"]
+                orgname = results["orgName"]
+                email = results["email"]
+                emsg = Message("Service Points Request Denied",
+                        sender=("ServicePoints", "servicePnts@gmail.com"),
+                        recipients=[email])
+                emsg.body = "Hi " + fullname + "! Your request for ServicePoints for " + serviceType + " in " + orgname + " has been denied for the following reason: " + description
+                mail.send(emsg)
             if 'confirm' in flask.request.form:
                 numHours = int(flask.request.form["numHours"])
                 post = flask.request.form["postid"]
@@ -233,6 +269,17 @@ def viewRequests():
                 cursor.execute('INSERT INTO pastRequests(member, service, points, description) VALUES '
                                '(:one,:two,:three,:four)', {"one": username, "two": serviceType, "three": numHours, "four": ''})
                 cursor.execute('DELETE FROM requests WHERE postid =:one ', {"one": post})
+
+                rescur = cursor.execute('SELECT fullname, orgName, email FROM users WHERE username = ?', (username,))
+                results = rescur.fetchone()
+                fullname = results["fullname"]
+                orgname = results["orgName"]
+                email = results["email"]
+                emsg = Message("Service Points Request Approved",
+                        sender=("ServicePoints", "servicePnts@gmail.com"),
+                        recipients=[email])
+                emsg.body = "Hi " + fullname + "! Your request for ServicePoints for " + serviceType + " in " + orgname + " has been approved." 
+                mail.send(emsg)
 
             if file != '':
                 os.remove(os.path.join(servicePoints.app.config["IMAGES_FOLDER"], file))
@@ -490,7 +537,15 @@ def profile():
             username = str(flask.session['username'])
             cur = servicePoints.model.get_db()
             cur.execute('UPDATE users SET email = ? WHERE username = ?',
-                                        (email, username,))                           
+                                        (email, username,))  
+            #Change password
+        elif 'password' in flask.request.form: 
+            password = str(flask.request.form['password'])
+            username = str(flask.session['username'])
+            cur = servicePoints.model.get_db()
+            pw = hash_pass(password)
+            cur.execute('UPDATE users SET password = ? WHERE username = ?',
+                                        (pw, username,))                         
 
     cur = cursor.execute('SELECT * FROM pendingOrgs WHERE username =:who', {"who": username})
     trypending = cur.fetchone()

@@ -259,6 +259,15 @@
                         </div>
 
                     </form>
+
+                    <form action="/accounts/profile/" method="post">
+                        <div class="form-group">
+                            <label for="fullname">Change your password:</label>
+                            <input class="form-control" type="password" name="password" placeholder="Enter updated password" required maxlength="40" />
+                            <input type="submit" class="btn btn-default btn-width" name="password" value="Update Password" style="margin-top: 10px;"/>
+                        </div>
+
+                    </form>
                     <hr />
                 </div>
                 <a class="btn btn-width btn-lg btn-block" href="" data-toggle="modal" data-target="#deleteModal">Delete Account</a>

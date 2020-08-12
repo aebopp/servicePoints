@@ -98,11 +98,18 @@
                 </button>
             </div>
             {% endif %}
-            <input type="submit" value="Login" id="login-form-submit" />
+            <input type="submit" name="login" value="Login" id="login-form-submit" />
         </form>
-
+        
         <a class="register" href="/accounts/create/">Create a member account</a>
         <a class="register" href="/accounts/createOrg/">Create an organization</a>
+        <form id="password-form" action="/accounts/login/" method="post" enctype="multipart/form-data">
+            <div>
+                <b>Username: </b>
+                <input type="text" placeholder="Enter Username" class="login-form-field" name="username" required />
+            <input type="submit" name = "pass" value="Forgotten Password" id="password-form-submit" />
+                </div>
+        </form>
 
     </main>
 
