@@ -56,7 +56,7 @@ CREATE TABLE posts(
 	  poster VARCHAR(20) NOT NULL,
 	  service VARCHAR(40) NOT NULL,
 	  name VARCHAR(30) NOT NULL,
-	  description VARCHAR(128) NOT NULL,
+	  description VARCHAR(256) NOT NULL,
 	  link VARCHAR(128) NOT NULL,
 	  PRIMARY KEY(postid)
 );

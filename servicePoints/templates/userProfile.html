@@ -89,7 +89,7 @@
         <div class="row">
             <div class="col-sm-8">
                 <h2 class="display-4" style="color:#6a1b9a"><b>Profile</b></h2>
-                <hr style="background-color:#6a1b9a"/>
+                <hr style="background-color:#6a1b9a" />
                 {% if pending != '' %}
                 <div class="alert alert-warning alert-dismissible fade show" role="alert">
                     <strong>
@@ -123,7 +123,7 @@
                 </form>
                 {% endif %}
                 {% endif %}
-                
+
                 {% if msg != '' %}
                 <div class="alert alert-warning alert-dismissible fade show" role="alert">
                     <strong>{{ msg }}</strong>
@@ -132,38 +132,6 @@
                     </button>
                 </div>
                 {% endif %}
-                {% if leader == 1 %}
-                <form action="/accounts/profile/" name="Notifications" method="post">
-                    <p>
-                        <label for="Notifications">Receive Email Notifications For</label>
-                    </p>
-                    {%if members == 0%}
-                    <p>
-                        <input id="members" type="checkbox" name="membersBox"/>
-                        Requests to Join Your Organization
-                    </p>
-                    {%endif%}
-                    {%if members == 1%}
-                    <p>
-                        <input id="members" type="checkbox" name="membersBox" checked/>
-                        Requests to Join Your Organization
-                    </p>
-                    {%endif%}
-                    {%if reqs == 0%}
-                    <p>                        
-                        <input id="reqs" type="checkbox" name="reqsBox"/>
-                        Member Requests for ServicePoints
-                    </p>
-                    {%endif%}
-                    {%if reqs == 1%}
-                    <p>                        
-                        <input id="reqs" type="checkbox" name="reqsBox" checked/>
-                        Member Requests for ServicePoints
-                    </p>
-                    {%endif%}
-                    <input type="submit" value="Submit" name="Notifications">
-                </form>
-                {%endif%}
 
                 <h2 style="margin-bottom: 20px; margin-top: 20px;" class="title">Pending Service Points:</h2>
                 {% for request in requests %}
@@ -255,7 +223,7 @@
                         <div class="form-group">
                             <label for="fullname">Change your email:</label>
                             <input class="form-control" type="email" name="email" placeholder="Enter updated email" required maxlength="40" />
-                            <input type="submit" class="btn btn-default btn-width" name="email" value="Update Email" style="margin-top: 10px;"/>
+                            <input type="submit" class="btn btn-default btn-width" name="email" value="Update Email" style="margin-top: 10px;" />
                         </div>
 
                     </form>
@@ -264,13 +232,46 @@
                         <div class="form-group">
                             <label for="fullname">Change your password:</label>
                             <input class="form-control" type="password" name="password" placeholder="Enter updated password" required maxlength="40" />
-                            <input type="submit" class="btn btn-default btn-width" name="password" value="Update Password" style="margin-top: 10px;"/>
+                            <input type="submit" class="btn btn-default btn-width" name="password" value="Update Password" style="margin-top: 10px;" />
                         </div>
 
                     </form>
+
+                    {% if leader == 1 %}
+                    <form action="/accounts/profile/" name="Notifications" method="post">
+                        <label for="Notifications">Update Email Notifications:</label>
+                        {%if members == 0%}
+                        <p>
+                            <input id="members" type="checkbox" name="membersBox" />
+                            Requests to Join Your Organization
+                        </p>
+                        {%endif%}
+                        {%if members == 1%}
+                        <p>
+                            <input id="members" type="checkbox" name="membersBox" checked />
+                            Requests to Join Your Organization
+                        </p>
+                        {%endif%}
+                        {%if reqs == 0%}
+                        <p>
+                            <input id="reqs" type="checkbox" name="reqsBox" />
+                            Member Requests for ServicePoints
+                        </p>
+                        {%endif%}
+                        {%if reqs == 1%}
+                        <p>
+                            <input id="reqs" type="checkbox" name="reqsBox" checked />
+                            Member Requests for ServicePoints
+                        </p>
+                        {%endif%}
+                        <input type="submit" class="btn btn-default btn-width" value="Update Notifications" name="Notifications">
+                    </form>
+                    {%endif%}
+
+
                     <hr />
                 </div>
-                <a class="btn btn-width btn-lg btn-block" href="" data-toggle="modal" data-target="#deleteModal">Delete Account</a>
+                <a class="btn btn-width btn-lg btn-block" href="" data-toggle="modal" data-target="#deleteModal" style="margin-bottom: 10px;">Delete Account</a>
             </div>
         </div>
     </div>

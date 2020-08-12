@@ -24,7 +24,6 @@
             font-family: Arial, Helvetica, sans-serif;
             display: grid;
             justify-items: center;
-            text-align:center;
         }
 
         input[type=submit]:hover {
@@ -37,6 +36,7 @@
             padding: 20px 20px 30px;
             border-radius: 7px;
             border: 3px solid black;
+            text-align: center;
         }
 
         .login-form-field {
@@ -91,7 +91,7 @@
                 <input type="password" placeholder="Enter Password" class="login-form-field" name="password" required />
             </div>
             {% if msg != '' %}
-            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <div class="alert alert-warning alert-dismissible fade show" role="alert" style="overflow-wrap:break-word;">
                 <strong>{{ msg }}</strong>
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
@@ -100,16 +100,36 @@
             {% endif %}
             <input type="submit" name="login" value="Login" id="login-form-submit" />
         </form>
-        
+
         <a class="register" href="/accounts/create/">Create a member account</a>
         <a class="register" href="/accounts/createOrg/">Create an organization</a>
-        <form id="password-form" action="/accounts/login/" method="post" enctype="multipart/form-data">
-            <div>
-                <b>Username: </b>
-                <input type="text" placeholder="Enter Username" class="login-form-field" name="username" required />
-            <input type="submit" name = "pass" value="Forgotten Password" id="password-form-submit" />
+        <a class="register" href="" data-toggle="modal" data-target="#forgetModal">Forget your password?</a>
+
+        <div class="modal fade" id="forgetModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header" style="color: #6a1b9a; border-radius: 4px;">
+                        <h3 class="modal-title" id="myModalLabel">Forgotten Password?</h3>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="color: #fff; opacity: 1;">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="password-form" action="/accounts/login/" method="post" enctype="multipart/form-data">
+                            <div>
+                                <b>Enter Username: </b>
+                                <input type="text" placeholder="Enter Username" class="login-form-field" name="username" required maxlength="40"/>
+                                
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn" data-dismiss="modal" style="border: solid 2px #80cbc4;">Close</button>
+                                <input type="submit" class="btn" name="pass" value="Forgotten Password" id="password-form-submit" style="background-color: #80cbc4;"/>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-        </form>
+            </div>
+        </div>
 
     </main>
 
