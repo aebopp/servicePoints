@@ -12,6 +12,8 @@ from flask import request
 from flask import Flask
 from flask_mail import Mail
 from flask_mail import Message
+from servicePoints.utils import key
+from servicePoints.utils import password
 import servicePoints
 APP = flask.Flask(__name__)
 
@@ -22,15 +24,14 @@ APP.config.update(dict(
     MAIL_USE_TLS = True,
     MAIL_USE_SSL = False,
     MAIL_USERNAME = 'servicePnts@gmail.com',
-    MAIL_PASSWORD = 'SrvcPnts-2020',
+    MAIL_PASSWORD = password(),
 ))
 
 mail = Mail(APP)
 APP.config['MAX_IMAGE_FILESIZE'] = 1024 * 1024
 APP.config['ALLOWED_IMAGE_EXTENSIONS'] = ["JPEG", "JPG", "PNG", "GIF"]
 
-servicePoints.app.secret_key = b'''\xf4\xb2\x9f\x80\xb1\xef\x01\xc6\x10\xca
-    \xdd\x84\xd4\xf3\x0c\x95\xad\xa6\xdc\xaf\xd3\xbeI\xf7'''
+servicePoints.app.secret_key = key()
 
 @servicePoints.app.route('/accounts/login/', methods=['GET', 'POST'])
 def login():
