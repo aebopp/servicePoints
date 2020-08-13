@@ -111,7 +111,9 @@ def create():
         name = str(flask.request.form['username'])
         
         to_add = (name,)
-        cursor.execute('SELECT * FROM users WHERE username=?', to_add)
+        lowname = name.lower()
+        to_addL = (lowname,)
+        cursor.execute('SELECT * FROM users WHERE lowU=?', to_addL)
 
         # If the chosen name is already taken
         if cursor.fetchone() is not None or name == "pending":
@@ -127,11 +129,11 @@ def create():
 
             pw = hash_pass(flask.session['password'])
             cur = servicePoints.model.get_db()
-            data = (flask.session['username'], flask.session['fullname'],
+            data = (flask.session['username'], lowname, flask.session['fullname'],
                     flask.session['email'], 'NONE',
                     pw, 0)
-            cur.execute("INSERT INTO users(username, fullname, email, orgName, "
-                        "password, hours) VALUES (?, ?, ?, ?, ?, ?)", data)
+            cur.execute("INSERT INTO users(username, lowU, fullname, email, orgName, "
+                        "password, hours) VALUES (?, ?, ?, ?, ?, ?, ?)", data)
             if flask.session['orgName'] != 'NONE':
                 pendingData = (flask.session['username'], flask.session['fullname'],
                                flask.session['email'], flask.session['orgName'], 0)
@@ -177,15 +179,19 @@ def createOrg():
         cursor = servicePoints.model.get_db().cursor()
         name = str(flask.request.form['username'])
         orgName = str(flask.request.form['orgName'])
+        lowOrg = orgName.lower()
+        lowname = name.lower()
 
         to_add = (name,)
         to_addOrg = (orgName,)
+        to_addLow = (lowOrg,)
+        to_addLowN = (lowname,)
 
-        cursor.execute('SELECT * FROM users WHERE username=?', to_add)
+        cursor.execute('SELECT * FROM users WHERE lowU=?', to_addLowN)
         if cursor.fetchone() is not None or name == "pending":
             msg = 'Username is already taken.'
 
-        cursor.execute('SELECT * FROM orgs WHERE orgName=?', to_addOrg)
+        cursor.execute('SELECT * FROM orgs WHERE lowOrgName=?', to_addLow)
         if cursor.fetchone() is not None or orgName == "NONE":
             msg = 'Organization name is already taken.'
         if msg == '':
@@ -196,14 +202,14 @@ def createOrg():
             flask.session['password'] = flask.request.form['password']
 
             pw = hash_pass(flask.session['password'])
-            data = (flask.session['username'], flask.session['fullname'],
-                    flask.session['email'], flask.session['orgName'],
+            data = (flask.session['username'], lowname, flask.session['fullname'],
+                    flask.session['email'], flask.session['orgName'], 
                     pw, 0)
-            orgData = (flask.session['username'], flask.session['orgName'], 1, 1)
+            orgData = (flask.session['username'], flask.session['orgName'], lowOrg, 1, 1)
             cur = servicePoints.model.get_db()
-            cur.execute("INSERT INTO orgs(username, orgName, newMember, pointReq) VALUES (?, ?, ?, ?)", orgData)
-            cur.execute("INSERT INTO users(username, fullname, email, orgName, "
-                        "password, hours) VALUES (?, ?, ?, ?, ?, ?)", data)
+            cur.execute("INSERT INTO orgs(username, orgName, lowOrgName, newMember, pointReq) VALUES (?, ?, ?, ?, ?)", orgData)
+            cur.execute("INSERT INTO users(username, lowU, fullname, email, orgName, "
+                        "password, hours) VALUES (?, ?, ?, ?, ?, ?, ?)", data)
 
             return flask.redirect(flask.url_for('index'))
 
