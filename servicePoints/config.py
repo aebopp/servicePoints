@@ -1,9 +1,9 @@
 import os
+from servicePoints.utils import key
 
 APPLICATION_ROOT = '/'
 
-SECRET_KEY = b'''\xf4\xb2\x9f\x80\xb1\xef\x01\xc6\x10
-\xca\xdd\x84\xd4\xf3\x0c\x95\xad\xa6\xdc\xaf\xd3\xbeI\xf7'''
+SECRET_KEY = key()
 SESSION_COOKIE_NAME = 'login'
 
 IMAGES_FOLDER = os.path.join(
